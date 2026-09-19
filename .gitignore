@@ -1,0 +1,7 @@
+node_modules
+.env
+.npm-cache
+.tmp
+data
+dist
+/dataverse_files.zip

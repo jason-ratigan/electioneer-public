@@ -17,12 +17,14 @@ Every importer should produce records in the following common layers before doma
 
 | Layer | Stable identity | Key fields | Notes |
 | --- | --- | --- | --- |
-| Geography | internal ID plus source identifiers | level, name, state FIPS, county FIPS, precinct source ID, valid dates | Precincts are versioned because boundaries and names change. |
-| Election event | source ID plus date/type | date, cycle, type, stage, jurisdiction, certification | A primary runoff is a distinct event. |
-| Contest | event plus office/district/party | office, district, seat, party, voting method | Presidential nomination contests use a specialized extension. |
-| Choice | contest plus source choice ID | candidate, party, write-in/other status | Never infer candidate identity from name alone. |
-| Result snapshot | contest, reporting unit, timestamp, source | votes, ballots cast, reporting status, certification | Snapshots are immutable; corrections append a new version. |
-| Provenance | source artifact plus checksum | URL/path, retrieved time, checksum, parser version, license | Preserve raw source artifacts outside DuckDB when practical. |
+| Geography | `geographies`, `geography_source_ids`, `geography_versions`, `geography_relationships` | type, name, FIPS codes, dated geometry and relationships | Precincts are versioned because boundaries and names change. |
+| Election event | `election_events`, `election_source_ids` | dates, cycle, stage, scope geography | A primary runoff is a distinct event. |
+| Contest | `contests`, `contest_source_ids`, `offices` | event, office, district, primary party, voting method | Presidential nomination contests use a specialized extension. |
+| Choice | `contest_choices`, `contest_choice_candidates`, `contest_choice_source_ids` | ballot label, candidate/ticket members, party, write-in status | Never infer candidate identity from name alone. |
+| Results | `result_batches`, `result_snapshots`, `reporting_unit_statuses`, `vote_totals` | source/retrieval time, reporting status, votes by choice/unit/type/round | Snapshots are immutable; corrections append a new version. |
+| Polling | `pollsters`, `polls`, `poll_questions`, `poll_responses` | field dates, population, sample, question, toplines | Poll responses never share the official-results tables. |
+| Models | `model_runs`, input-link tables, `model_estimates` | version, as-of time, parameters, exact inputs, estimates | Projections never overwrite source vote totals. |
+| Provenance | `data_sources`, `source_artifacts`, `ingestion_runs` | URI, retrieval time, checksum, parser version, license | Preserve raw source artifacts outside PostgreSQL when practical. |
 
 The reusable geographic relationship is a **versioned containment graph**, not a permanent tree:
 
@@ -80,11 +82,13 @@ An on-demand refresh should execute as a job with these phases:
 7. publish the completed snapshot pointer to the UI; and
 8. record duration, rows, bytes, warnings, parser version, and failure details.
 
+Each snapshot may contain source reporting-unit rows and a contest-wide summary row. The summary row uses the contest's `district_geography_id` and records whether it was source-reported or calculated by `sum_of_reporting_units`; consumers must not sum mixed geography levels.
+
 The UI must show source timestamp, application retrieval timestamp, percent reporting definition, and unofficial/certified status. A failed refresh leaves the last successful snapshot visible and clearly labeled.
 
 ## Storage controls
 
-- Keep normalized data and indexes in DuckDB; keep compressed raw files in a partitioned `data/raw/{source}/{year}/{event}` directory.
+- Keep normalized data and spatial indexes in PostgreSQL/PostGIS; keep compressed raw files in a partitioned `data/raw/{source}/{year}/{event}` directory or object store.
 - Record artifact byte counts in the ingestion ledger and expose database plus raw-artifact usage in the UI.
 - Use content hashes to avoid storing identical provider payloads twice.
 - Retain all certified snapshots, first and final election-night snapshots, snapshots containing a value change, and correction boundaries. Make dense unchanged snapshots eligible for compaction.

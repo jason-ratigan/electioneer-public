@@ -1,39 +1,59 @@
-import duckdb from 'duckdb';
-import fs from 'node:fs';
-fs.mkdirSync('data', { recursive: true });
-export const db = new duckdb.Database(process.env.DATABASE_PATH || 'data/signal.duckdb');
-export const run = (sql, params = []) => new Promise((resolve, reject) => db.run(sql, ...params, error => error ? reject(error) : resolve()));
-export const all = (sql, params = []) => new Promise((resolve, reject) => db.all(sql, ...params, (error, rows) => error ? reject(error) : resolve(rows)));
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import pg from 'pg';
+
+const { Pool } = pg;
+const migrationsDirectory = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  'migrations'
+);
+
+export const db = new Pool({
+  connectionString: process.env.DATABASE_URL || 'postgresql://signal:signal@localhost:55432/signal',
+  max: Number(process.env.DATABASE_POOL_SIZE || 10),
+  ssl: process.env.DATABASE_SSL === 'true'
+    ? { rejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false' }
+    : undefined
+});
+
+db.on('error', error => console.error('Unexpected PostgreSQL pool error', error));
+
+export const run = (sql, params = []) => db.query(sql, params);
+export const all = async (sql, params = []) => (await db.query(sql, params)).rows;
+export const closeDatabase = () => db.end();
 
 export async function initializeDatabase() {
-  await run(`CREATE TABLE IF NOT EXISTS races (id VARCHAR PRIMARY KEY, cycle INTEGER, election_type VARCHAR, election_level VARCHAR, office VARCHAR, jurisdiction VARCHAR, is_ballot_measure BOOLEAN DEFAULT FALSE, candidate_a VARCHAR, candidate_b VARCHAR)`);
-  await run(`CREATE TABLE IF NOT EXISTS observations (id VARCHAR PRIMARY KEY, race_id VARCHAR, observed_at TIMESTAMP, metric VARCHAR, value_a DOUBLE, value_b DOUBLE, reporting DOUBLE, source VARCHAR)`);
-  await run(`CREATE TABLE IF NOT EXISTS ingest_runs (id VARCHAR PRIMARY KEY, source VARCHAR, started_at TIMESTAMP, completed_at TIMESTAMP, status VARCHAR, rows_added INTEGER, message VARCHAR)`);
-  const [{ count }] = await all('SELECT COUNT(*)::INTEGER count FROM races');
-  if (!count) {
-    await run(`INSERT INTO races VALUES
-      ('az-sen-g',2026,'general','state','Senate','Arizona',FALSE,'Candidate A','Candidate B'),
-      ('ga-gov-p',2026,'primary','state','Governor','Georgia',FALSE,'Candidate A','Candidate B'),
-      ('us-pres-g',2024,'presidential_general','national','President','National',FALSE,'Candidate A','Candidate B'),
-      ('us-pres-primary',2024,'presidential_primary','state','President','Illustrative State',FALSE,'Candidate A','Candidate B'),
-      ('us-pres-2020',2020,'presidential_general','national','President','National',FALSE,'Candidate A','Candidate B'),
-      ('mi-gov-2018',2018,'general','state','Governor','Michigan',FALSE,'Candidate A','Candidate B'),
-      ('pa-sen-2016',2016,'general','state','Senate','Pennsylvania',FALSE,'Candidate A','Candidate B'),
-      ('us-pres-2012',2012,'presidential_general','national','President','National',FALSE,'Candidate A','Candidate B'),
-      ('nc-gov-2008',2008,'general','state','Governor','North Carolina',FALSE,'Candidate A','Candidate B'),
-      ('us-pres-2004',2004,'presidential_general','national','President','National',FALSE,'Candidate A','Candidate B'),
-      ('us-pres-2000',2000,'presidential_general','national','President','National',FALSE,'Candidate A','Candidate B')`);
-    await run(`INSERT INTO observations VALUES
-      ('o1','az-sen-g',CURRENT_TIMESTAMP,'poll',46.8,45.9,0,'Illustrative demo'),
-      ('o2','ga-gov-p',CURRENT_TIMESTAMP,'poll',42.3,39.8,0,'Illustrative demo'),
-      ('o3','us-pres-g',CURRENT_TIMESTAMP,'result',48.2,49.1,100,'Illustrative demo'),
-      ('o11','us-pres-primary',CURRENT_TIMESTAMP,'result',45.2,39.1,100,'Illustrative demo'),
-      ('o4','us-pres-2020',CURRENT_TIMESTAMP,'result',51.2,46.8,100,'Illustrative demo'),
-      ('o5','mi-gov-2018',CURRENT_TIMESTAMP,'result',52.1,45.3,100,'Illustrative demo'),
-      ('o6','pa-sen-2016',CURRENT_TIMESTAMP,'result',47.4,48.8,100,'Illustrative demo'),
-      ('o7','us-pres-2012',CURRENT_TIMESTAMP,'result',50.7,47.9,100,'Illustrative demo'),
-      ('o8','nc-gov-2008',CURRENT_TIMESTAMP,'result',49.2,47.1,100,'Illustrative demo'),
-      ('o9','us-pres-2004',CURRENT_TIMESTAMP,'result',48.3,50.7,100,'Illustrative demo'),
-      ('o10','us-pres-2000',CURRENT_TIMESTAMP,'result',48.4,47.9,100,'Illustrative demo')`);
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query("SELECT pg_advisory_xact_lock(hashtext('signal_schema_migrations'))");
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+        name TEXT PRIMARY KEY,
+        applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+
+    const applied = new Set(
+      (await client.query('SELECT name FROM schema_migrations')).rows.map(row => row.name)
+    );
+    const migrationFiles = (await fs.readdir(migrationsDirectory))
+      .filter(file => file.endsWith('.sql'))
+      .sort();
+
+    for (const migrationFile of migrationFiles) {
+      if (applied.has(migrationFile)) continue;
+      const sql = await fs.readFile(path.join(migrationsDirectory, migrationFile), 'utf8');
+      await client.query(sql);
+      await client.query('INSERT INTO schema_migrations (name) VALUES ($1)', [migrationFile]);
+    }
+
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
   }
 }

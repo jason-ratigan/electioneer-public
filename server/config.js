@@ -5,8 +5,7 @@ export const archivePolicy = Object.freeze({
   historicalLocalResults: false,
   historicalBallotMeasures: false,
   allowedHistoricalStateOffices: ['Governor'],
-  manualRefreshOnly: true,
-  maxDatabaseMb: Number(process.env.MAX_DATABASE_MB || 2048)
+  manualRefreshOnly: true
 });
 
 export const sources = Object.freeze([
