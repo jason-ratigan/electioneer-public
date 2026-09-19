@@ -115,6 +115,47 @@ function rowsToFeatureCollection(rows, level) {
   return { type: 'FeatureCollection', features: [...features.values()] };
 }
 
+function rowsToDistrictFeatureCollection(rows) {
+  const features = new Map();
+  for (const row of rows) {
+    if (!features.has(row.geography_id)) {
+      features.set(row.geography_id, {
+        type: 'Feature',
+        id: row.geography_id,
+        geometry: row.geometry,
+        properties: {
+          geographyId: row.geography_id,
+          stateFips: row.state_fips,
+          stateAbbreviation: row.state_abbreviation,
+          stateName: row.state_name,
+          districtCode: row.district_code,
+          districtLabel: row.district_label,
+          contestId: row.contest_id,
+          totalVotes: 0,
+          choices: []
+        }
+      });
+    }
+    const properties = features.get(row.geography_id).properties;
+    if (row.choice_id) {
+      const votes = numberOrZero(row.votes);
+      properties.totalVotes += votes;
+      properties.choices.push({
+        id: row.choice_id,
+        candidateId: row.candidate_id,
+        ballotName: row.ballot_name,
+        party: row.party_name,
+        partyAbbreviation: row.party_abbreviation,
+        votes
+      });
+    }
+  }
+  for (const item of features.values()) {
+    item.properties.choices.sort((left, right) => right.votes - left.votes || left.ballotName.localeCompare(right.ballotName));
+  }
+  return { type: 'FeatureCollection', features: [...features.values()] };
+}
+
 export const electionHubRepository = {
   async options() {
     const rows = await all(`
@@ -157,7 +198,31 @@ export const electionHubRepository = {
 
   async overview({ office, cycle, stage }) {
     const rows = await all(`
-      WITH latest AS (${latestSnapshots})
+      WITH latest AS (${latestSnapshots}),
+      ranked_contests AS (
+        SELECT
+          contest.id,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              contest.election_id,
+              contest.office_id,
+              CASE
+                WHEN office.slug = 'us_house' AND district.state_fips = '11' THEN 'dc-at-large'
+                ELSE contest.district_geography_id::TEXT
+              END
+            ORDER BY
+              latest.reported_at DESC NULLS LAST,
+              latest.retrieved_at DESC,
+              latest.id DESC
+          ) AS recency_rank
+        FROM contests contest
+        JOIN offices office ON office.id = contest.office_id
+        JOIN geographies district ON district.id = contest.district_geography_id
+        JOIN latest ON latest.contest_id = contest.id
+      ),
+      selected_contests AS (
+        SELECT id FROM ranked_contests WHERE recency_rank = 1
+      )
       SELECT
         contest.id::TEXT AS contest_id,
         contest.name AS contest_name,
@@ -185,6 +250,7 @@ export const electionHubRepository = {
         party.abbreviation AS party_abbreviation,
         total.votes
       FROM contests contest
+      JOIN selected_contests selected ON selected.id = contest.id
       JOIN offices office ON office.id = contest.office_id
       JOIN election_events election ON election.id = contest.election_id
       JOIN geographies district ON district.id = contest.district_geography_id
@@ -214,6 +280,109 @@ export const electionHubRepository = {
       ORDER BY state.name, contest.district_label NULLS FIRST, total.votes DESC NULLS LAST, choice.ballot_name
     `, [office, cycle, stage]);
     return groupContests(rows);
+  },
+
+  async districtResults({ cycle, stage }) {
+    const rows = await all(`
+      WITH latest AS (${latestSnapshots}),
+      ranked_contests AS (
+        SELECT
+          contest.id,
+          contest.district_geography_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY
+              contest.election_id,
+              CASE
+                WHEN district.state_fips = '11' THEN 'dc-at-large'
+                ELSE contest.district_geography_id::TEXT
+              END
+            ORDER BY
+              latest.reported_at DESC NULLS LAST,
+              latest.retrieved_at DESC,
+              latest.id DESC
+          ) AS recency_rank
+        FROM contests contest
+        JOIN offices office ON office.id = contest.office_id
+        JOIN election_events election ON election.id = contest.election_id
+        JOIN geographies district ON district.id = contest.district_geography_id
+        JOIN latest ON latest.contest_id = contest.id
+        WHERE office.slug = 'us_house'
+          AND election.cycle = $1
+          AND election.stage = $2
+      ),
+      selected_contests AS (
+        SELECT id, district_geography_id
+        FROM ranked_contests
+        WHERE recency_rank = 1
+      ),
+      eligible_districts AS (
+        SELECT
+          district.id,
+          district.name,
+          district.abbreviation,
+          district.state_fips,
+          version.geom,
+          selected.id AS contest_id,
+          ROW_NUMBER() OVER (
+            PARTITION BY district.state_fips, district.abbreviation
+            ORDER BY (selected.id IS NOT NULL) DESC, district.id
+          ) AS geography_rank
+        FROM geographies district
+        JOIN geography_versions version
+          ON version.geography_id = district.id
+          AND version.valid_from <= MAKE_DATE($1, 11, 3)
+          AND (version.valid_to IS NULL OR version.valid_to >= MAKE_DATE($1, 11, 3))
+        LEFT JOIN selected_contests selected ON selected.district_geography_id = district.id
+        WHERE district.geography_type = 'congressional_district'
+      )
+      SELECT
+        district.id::TEXT AS geography_id,
+        ST_AsGeoJSON(district.geom)::JSON AS geometry,
+        district.state_fips,
+        state.abbreviation AS state_abbreviation,
+        state.name AS state_name,
+        CASE
+          WHEN district.abbreviation LIKE '%-AL' THEN 'AL'
+          ELSE REGEXP_REPLACE(district.abbreviation, '^.*-', '')
+        END AS district_code,
+        COALESCE(contest.district_label,
+          CASE
+            WHEN district.abbreviation LIKE '%-AL' THEN 'At-Large'
+            ELSE 'District ' || (REGEXP_REPLACE(district.abbreviation, '^.*-', '')::INTEGER)::TEXT
+          END
+        ) AS district_label,
+        contest.id::TEXT AS contest_id,
+        choice.id::TEXT AS choice_id,
+        candidate.candidate_id::TEXT AS candidate_id,
+        choice.ballot_name,
+        party.name AS party_name,
+        party.abbreviation AS party_abbreviation,
+        total.votes
+      FROM eligible_districts district
+      JOIN geographies state
+        ON state.geography_type = 'state' AND state.state_fips = district.state_fips
+      LEFT JOIN contests contest ON contest.id = district.contest_id
+      LEFT JOIN latest ON latest.contest_id = contest.id
+      LEFT JOIN contest_choices choice ON choice.contest_id = contest.id
+      LEFT JOIN parties party ON party.id = choice.party_id
+      LEFT JOIN LATERAL (
+        SELECT candidate_id
+        FROM contest_choice_candidates
+        WHERE contest_choice_id = choice.id
+        ORDER BY ticket_position
+        LIMIT 1
+      ) candidate ON TRUE
+      LEFT JOIN vote_totals total
+        ON total.snapshot_id = latest.id
+        AND total.reporting_unit_id = contest.district_geography_id
+        AND total.contest_choice_id = choice.id
+        AND total.vote_status = 'reported'
+        AND total.vote_type = 'total'
+        AND total.round = 0
+      WHERE district.geography_rank = 1
+      ORDER BY state.name, district_code, total.votes DESC NULLS LAST, choice.ballot_name
+    `, [cycle, stage]);
+    return rowsToDistrictFeatureCollection(rows);
   },
 
   async geographicResults({ contestId, level }) {
@@ -258,17 +427,37 @@ export const electionHubRepository = {
               ON version.geography_id = county.id
               AND version.valid_from <= info.election_date
               AND (version.valid_to IS NULL OR version.valid_to >= info.election_date)
-            JOIN geography_relationships relationship
-              ON relationship.parent_geography_id = county.id
-              AND relationship.relationship_type = 'contains'
-              AND relationship.valid_from <= info.election_date
-              AND (relationship.valid_to IS NULL OR relationship.valid_to >= info.election_date)
-            JOIN vote_totals total
-              ON total.snapshot_id = info.snapshot_id
-              AND total.reporting_unit_id = relationship.child_geography_id
-              AND total.vote_status = 'reported'
-              AND total.vote_type = 'total'
-              AND total.round = 0
+            JOIN LATERAL (
+              SELECT direct.contest_choice_id, direct.votes, direct.is_estimated
+              FROM vote_totals direct
+              WHERE direct.snapshot_id = info.snapshot_id
+                AND direct.reporting_unit_id = county.id
+                AND direct.vote_status = 'reported'
+                AND direct.vote_type = 'total'
+                AND direct.round = 0
+              UNION ALL
+              SELECT derived.contest_choice_id, derived.votes, derived.is_estimated
+              FROM geography_relationships relationship
+              JOIN vote_totals derived
+                ON derived.snapshot_id = info.snapshot_id
+                AND derived.reporting_unit_id = relationship.child_geography_id
+                AND derived.vote_status = 'reported'
+                AND derived.vote_type = 'total'
+                AND derived.round = 0
+              WHERE relationship.parent_geography_id = county.id
+                AND relationship.relationship_type = 'contains'
+                AND relationship.valid_from <= info.election_date
+                AND (relationship.valid_to IS NULL OR relationship.valid_to >= info.election_date)
+                AND NOT EXISTS (
+                  SELECT 1
+                  FROM vote_totals direct_exists
+                  WHERE direct_exists.snapshot_id = info.snapshot_id
+                    AND direct_exists.reporting_unit_id = county.id
+                    AND direct_exists.vote_status = 'reported'
+                    AND direct_exists.vote_type = 'total'
+                    AND direct_exists.round = 0
+                )
+            ) total ON TRUE
             JOIN contest_choices choice ON choice.id = total.contest_choice_id
             LEFT JOIN parties party ON party.id = choice.party_id
             LEFT JOIN LATERAL (

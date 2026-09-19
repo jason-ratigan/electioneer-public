@@ -4,18 +4,23 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "npm run db:ready",
     "dev": "concurrently \"npm:dev:api\" \"npm:dev:web\"",
     "dev:api": "node --watch server/index.js",
     "dev:web": "vite",
     "build": "vite build",
     "start": "node server/index.js",
     "db:up": "docker compose up -d db",
+    "db:ready": "docker compose up -d --wait db",
     "db:down": "docker compose down",
     "db:migrate": "node server/migrate.js",
     "import:vest:de": "node server/importers/vest2020/cli.js",
+    "import:vest:2020": "node server/importers/vest2020/nationalCli.js",
+    "import:medsl:house:2020": "node server/importers/medsl2020/houseCli.js",
     "import:geography:de-counties": "node server/geography/importDelawareCounties.js",
-    "check": "node --check server/index.js && node --check server/db.js && node --check server/migrate.js && node --check server/config.js && node --check server/controllers/electionController.js && node --check server/services/electionService.js && node --check server/repositories/electionRepository.js && node --check server/repositories/electionHubRepository.js && node --check server/geography/importDelawareCounties.js && node --check server/identity/candidateUuid.js && node --check server/importers/vest2020/archive.js && node --check server/importers/vest2020/delawareManifest.js && node --check server/importers/vest2020/presidentialCandidates.js && node --check server/importers/vest2020/readDelaware.js && node --check server/importers/vest2020/importDelaware.js && node --check server/importers/vest2020/cli.js && node --check server/tests/normalizedSchema.test.js",
-    "test:schema": "node --test --experimental-test-isolation=none server/tests/normalizedSchema.test.js"
+    "import:geography:congress-116": "node server/geography/importCongressionalDistricts.js",
+    "check": "node --check server/index.js && node --check server/db.js && node --check server/migrate.js && node --check server/config.js && node --check server/controllers/electionController.js && node --check server/services/electionService.js && node --check server/repositories/electionRepository.js && node --check server/repositories/electionHubRepository.js && node --check server/geography/importDelawareCounties.js && node --check server/geography/importCongressionalDistricts.js && node --check server/identity/candidateUuid.js && node --check server/importers/vest2020/archive.js && node --check server/importers/vest2020/states.js && node --check server/importers/vest2020/documentation.js && node --check server/importers/vest2020/readState.js && node --check server/importers/vest2020/countyGeography.js && node --check server/importers/vest2020/importState.js && node --check server/importers/vest2020/nationalCli.js && node --check server/importers/vest2020/delawareManifest.js && node --check server/importers/vest2020/presidentialCandidates.js && node --check server/importers/vest2020/readDelaware.js && node --check server/importers/vest2020/importDelaware.js && node --check server/importers/vest2020/cli.js && node --check server/importers/medsl2020/archive.js && node --check server/importers/medsl2020/readHouse.js && node --check server/importers/medsl2020/importHouse.js && node --check server/importers/medsl2020/houseCli.js && node --check server/tests/normalizedSchema.test.js && node --check server/tests/vestNationalParser.test.js && node --check server/tests/medslHouseParser.test.js",
+    "test:schema": "node --test --experimental-test-isolation=none server/tests/normalizedSchema.test.js server/tests/vestNationalParser.test.js server/tests/medslHouseParser.test.js"
   },
   "dependencies": {
     "d3-geo": "^3.1.1",

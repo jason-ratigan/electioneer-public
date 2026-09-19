@@ -8,4 +8,5 @@ export const refresh = async (req,res,next) => { try {res.status(202).json({data
 export const getRuns = async (req,res,next) => { try {res.json({data:await electionService.runs()});} catch(e){next(e);} };
 export const getHubOptions = async (req,res,next) => { try {res.json({data:await electionService.hubOptions()});} catch(e){next(e);} };
 export const getHubOverview = async (req,res,next) => { try {res.json({data:await electionService.hubOverview(req.query)});} catch(e){next(e);} };
+export const getHubDistricts = async (req,res,next) => { try {res.json({data:await electionService.hubDistricts(req.query)});} catch(e){next(e);} };
 export const getHubGeographies = async (req,res,next) => { try {res.json({data:await electionService.hubGeographies(req.params.id,req.query)});} catch(e){next(e);} };

@@ -15,12 +15,13 @@ The API uses controller → service → repository separation:
 
 ## Run
 
+After installing the dependencies once with `npm install`, start the entire development stack with one command:
+
 ```bash
-npm install
-npm run db:up
-npm run db:migrate
 npm run dev
 ```
+
+This starts PostgreSQL/PostGIS through Docker Compose, waits for it to become healthy, and then launches both the API and web client. The API applies any pending migrations during startup. The database volume is preserved between runs, so imported election data remains available. Press `Ctrl+C` to stop the application processes; use `npm run db:down` when you also want to stop PostgreSQL.
 
 The web client runs at `http://localhost:4173`; the API runs at `http://localhost:3000`. Production uses `npm run build && npm start`. The default development connection is `postgresql://signal:signal@localhost:55432/signal`; set `DATABASE_URL` for another PostgreSQL instance. The high development port avoids colliding with a system PostgreSQL installation. Set `DATABASE_SSL=true` when the provider requires TLS. The bundled Compose service uses PostgreSQL 17 with PostGIS 3.5.
 
@@ -50,6 +51,44 @@ npm run import:geography:de-counties
 
 The election hub then shows a national availability map, Delaware county totals, and all 434 imported precincts. County totals are derived by summing the precinct-level VEST values assigned to each county by largest-area spatial intersection.
 
+## Nationwide VEST 2020 importer
+
+The outer Dataverse ZIP already contains the 50 states and District of Columbia. Validate any subset through the complete import pipeline without retaining database changes:
+
+```bash
+npm run import:vest:2020 -- --states MD,PA,VA
+```
+
+Commit a selected batch, or all 51 jurisdictions:
+
+```bash
+npm run import:vest:2020 -- --states MD,PA,VA --commit
+npm run import:vest:2020 -- --all --commit
+```
+
+Each state uses its own PostgreSQL transaction and ingestion-run record. A failed state is rolled back without affecting successful states, the default run continues to report remaining failures, and rerunning the command skips state artifacts already imported. Add `--stop-on-error` when debugging one failure. The importer reads nested state archives directly, discovers the supported contest columns, stores only President, Governor, U.S. Senate, and U.S. House results present in each state file, preserves national presidential UUIDs, repairs invalid source polygons, and builds county-to-precinct crosswalks.
+
+The standard state archives are used. The separate Kentucky and New Jersey VTD-estimate archives remain optional supplemental sources and are not selected automatically. The VEST files include U.S. House data for at-large jurisdictions and D.C.; most district-based House results require an additional source.
+
+## Nationwide MEDSL 2020 U.S. House importer
+
+Place the MEDSL download at `us_house_2020.zip`. Validate the complete import without retaining changes, then commit it:
+
+```bash
+npm run import:medsl:house:2020
+npm run import:medsl:house:2020 -- --commit
+```
+
+The importer reads `HOUSE_precinct_general.csv` directly from the ZIP, validates its 2020 general-election scope, combines voting modes and fusion-party lines, excludes overvote/undervote statistics, and stores district summaries plus county totals aggregated from the precinct rows. Candidate identities remain state-scoped and deterministic. Privacy-suppressed negative values are omitted and recorded as import warnings. Re-importing the same archive is idempotent. Use `--archive PATH` to select another archive location.
+
+The district maps use the Census Bureau's 2020 cartographic boundaries for the 116th Congress. Place `cb_2020_us_cd116_5m.zip` in `data/census/`, then import it with:
+
+```bash
+npm run import:geography:congress-116
+```
+
+The map shows all 436 voting and non-voting House districts in the 50 states and District of Columbia. The boundary importer excludes territories outside the application's current state scope and is safe to rerun.
+
 ## API
 
 - `GET /api/health`
@@ -58,6 +97,7 @@ The election hub then shows a national availability map, Delaware county totals,
 - `GET /api/archive/facets`
 - `GET /api/hub/options`
 - `GET /api/hub/overview?office=president&cycle=2020&stage=general`
+- `GET /api/hub/districts?cycle=2020&stage=general`
 - `GET /api/hub/contests/:id/geographies?level=county|precinct`
 - `GET /api/races/:id/history`
 - `GET /api/storage`

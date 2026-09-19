@@ -28,6 +28,13 @@ export const electionService = {
     if (!allowedTypes.has(stage)) throw Object.assign(new Error('Unsupported election stage'), { status: 400 });
     return electionHubRepository.overview({ office, cycle, stage });
   }
+  ,hubDistricts(filters){
+    const cycle = Number(filters.cycle || 2020);
+    if (!Number.isInteger(cycle) || cycle < 1788) throw Object.assign(new Error('Cycle must be a valid election year'), { status: 400 });
+    const stage = filters.stage || 'general';
+    if (!allowedTypes.has(stage)) throw Object.assign(new Error('Unsupported election stage'), { status: 400 });
+    return electionHubRepository.districtResults({ cycle, stage });
+  }
   ,hubGeographies(id, filters){
     if (!uuidPattern.test(id)) throw Object.assign(new Error('Contest ID must be a UUID'), { status: 400 });
     const level = filters.level || 'county';

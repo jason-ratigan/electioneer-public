@@ -43,6 +43,10 @@ function resultShare(votes, total) {
 function useJson(url, dependencies = []) {
   const [state, setState] = useState({ data: null, loading: true, error: null });
   useEffect(() => {
+    if (!url) {
+      setState({ data: null, loading: false, error: null });
+      return undefined;
+    }
     const controller = new AbortController();
     setState(current => ({ ...current, loading: true, error: null }));
     fetch(url, { signal: controller.signal })
@@ -73,8 +77,8 @@ function Sidebar({ storage, national, onNational }) {
     </nav>
     <div className="sidebar-context">
       <span className="context-label">AVAILABLE DATA</span>
-      <strong>Delaware · 2020</strong>
-      <p>President, Governor, U.S. House and U.S. Senate</p>
+      <strong>Nationwide · 2020</strong>
+      <p>Federal and gubernatorial results where present in imported sources</p>
     </div>
     <div className="sidebar-bottom">
       <div className="live-card"><span className="pulse"/><div><strong>PostgreSQL archive</strong><small>{storage ? `${storage.megabytes} MB · ${formatNumber.format(storage.vote_totals)} vote rows` : 'Checking database…'}</small></div></div>
@@ -121,7 +125,7 @@ function ResultList({ title, subtitle, choices = [], totalVotes = 0, compact = f
   </section>;
 }
 
-function NationalMap({ contests, officeLabel, cycle, onSelect }) {
+function NationalMap({ contests, districts, office, officeLabel, cycle, onSelect }) {
   const [unavailable, setUnavailable] = useState(null);
   const byState = useMemo(() => {
     const map = new Map();
@@ -132,20 +136,33 @@ function NationalMap({ contests, officeLabel, cycle, onSelect }) {
     }
     return map;
   }, [contests]);
+  const byContest = useMemo(() => new Map(contests.map(contest => [contest.id, contest])), [contests]);
+  const districtMode = office === 'us_house' && districts?.features?.length;
 
-  const selectState = stateFeature => {
+  const selectState = (stateFeature, preferredContestId = null) => {
     const stateContests = byState.get(fips(stateFeature.id));
     if (stateContests?.length) {
       setUnavailable(null);
-      onSelect(stateContests);
+      onSelect(stateContests, preferredContestId);
     } else {
       setUnavailable(stateFeature.properties.name);
     }
   };
 
+  const selectDistrict = district => {
+    const contest = byContest.get(district.properties.contestId);
+    const stateContests = byState.get(fips(district.properties.stateFips));
+    if (contest && stateContests?.length) {
+      setUnavailable(null);
+      onSelect(stateContests, contest.id);
+    } else {
+      setUnavailable(`${district.properties.stateName} ${district.properties.districtLabel}`);
+    }
+  };
+
   return <div className="map-card national-map-card">
     <div className="map-card-head">
-      <div><span className="section-label">NATIONAL OVERVIEW</span><h1>{cycle} {officeLabel} results</h1><p>Select a state to inspect county and precinct returns.</p></div>
+      <div><span className="section-label">NATIONAL OVERVIEW</span><h1>{cycle} {officeLabel} results</h1><p>{districtMode ? 'Select a congressional district to inspect its result.' : 'Select a state to inspect county and precinct returns.'}</p></div>
       <div className="map-key"><span><i className="data-fill"/>Imported results</span><span><i className="empty-fill"/>Not imported</span></div>
     </div>
     {unavailable && <div className="map-notice"><strong>{unavailable}</strong> has not been imported yet.<button onClick={() => setUnavailable(null)} aria-label="Dismiss">×</button></div>}
@@ -159,8 +176,8 @@ function NationalMap({ contests, officeLabel, cycle, onSelect }) {
             return <path
               key={item.id}
               d={nationalPath(item)}
-              className={imported ? 'state imported' : 'state'}
-              style={imported ? { fill: partyColor(leader) } : undefined}
+              className={imported && !districtMode ? 'state imported' : 'state'}
+              style={imported && !districtMode ? { fill: partyColor(leader) } : undefined}
               role="button"
               tabIndex="0"
               aria-label={`${item.properties.name}: ${imported ? 'results available' : 'not imported'}`}
@@ -168,12 +185,27 @@ function NationalMap({ contests, officeLabel, cycle, onSelect }) {
               onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') selectState(item); }}
             ><title>{item.properties.name}{imported && leader ? ` — ${leader.ballotName} received the most votes in imported results` : ' — not imported'}</title></path>;
           })}
+          {districtMode && districts.features.map(item => {
+            const contest = byContest.get(item.properties.contestId);
+            const leader = resultLeader(contest?.choices || item.properties.choices);
+            return <path
+              key={item.id}
+              d={nationalPath(item)}
+              className={`district-shape ${contest ? 'imported' : ''}`}
+              style={contest ? { fill: partyColor(leader) } : undefined}
+              role="button"
+              tabIndex="0"
+              aria-label={`${item.properties.stateName} ${item.properties.districtLabel}: ${contest ? 'results available' : 'not imported'}`}
+              onClick={() => selectDistrict(item)}
+              onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') selectDistrict(item); }}
+            ><title>{item.properties.stateAbbreviation} {item.properties.districtLabel}{leader ? ` — ${leader.ballotName} received the most votes` : ' — results unavailable'}</title></path>;
+          })}
           <path className="state-borders" d={nationalPath(stateBorders)}/>
         </g>
       </svg>
       {!contests.length && <div className="map-empty"><strong>No results found</strong><span>Choose another office or year.</span></div>}
     </div>
-    <footer><span><i className="source-dot"/>Data currently available for Delaware</span><span>State color reflects the choice with the most reported votes.</span></footer>
+    <footer><span><i className="source-dot"/>Imported results available nationwide</span><span>{districtMode ? 'District color reflects the leading candidate.' : 'State color reflects the choice with the most reported votes.'}</span></footer>
   </div>;
 }
 
@@ -186,10 +218,12 @@ function LocalMap({ collection, selectedId, onSelect, level }) {
   }, [collection]);
   const path = useMemo(() => projection ? geoPath(projection) : null, [projection]);
   if (!path || !collection.features.length) return <div className="local-map-empty"><strong>No {level} geometry is available.</strong><span>Run the geography import before opening this view.</span></div>;
-  return <svg className="local-map" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`Delaware ${level} election result map`}>
+  return <svg className="local-map" viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${level} election result map`}>
     {collection.features.map(item => {
       const leader = resultLeader(item.properties.choices);
       const selected = item.id === selectedId;
+      const regionName = item.properties.name
+        || `${item.properties.stateAbbreviation || ''} ${item.properties.districtLabel || ''}`.trim();
       return <path
         key={item.id}
         d={path(item)}
@@ -197,24 +231,56 @@ function LocalMap({ collection, selectedId, onSelect, level }) {
         style={{ fill: partyColor(leader) }}
         role="button"
         tabIndex="0"
-        aria-label={`${item.properties.name}, ${formatNumber.format(item.properties.totalVotes)} votes`}
+        aria-label={`${regionName}, ${formatNumber.format(item.properties.totalVotes)} votes`}
         onClick={() => onSelect(item)}
         onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') onSelect(item); }}
-      ><title>{item.properties.name} — {formatNumber.format(item.properties.totalVotes)} total votes</title></path>;
+      ><title>{regionName} — {formatNumber.format(item.properties.totalVotes)} total votes</title></path>;
     })}
   </svg>;
 }
 
-function StateView({ contests, initialContest, onBack }) {
+function StateView({ contests, initialContest, districts, onBack }) {
   const [contestId, setContestId] = useState(initialContest.id);
-  const [level, setLevel] = useState('county');
+  const [level, setLevel] = useState(initialContest.office.slug === 'us_house' ? 'district' : 'county');
   const [selectedRegion, setSelectedRegion] = useState(null);
   const contest = contests.find(item => item.id === contestId) || initialContest;
-  const geography = useJson(`/api/hub/contests/${contest.id}/geographies?level=${level}`, [contest.id, level]);
+  const isHouse = contest.office.slug === 'us_house';
+  const precinctMapAvailable = contest.source !== 'MIT Election Data and Science Lab';
+  const geographyUrl = level === 'district' ? null : `/api/hub/contests/${contest.id}/geographies?level=${level}`;
+  const geography = useJson(geographyUrl, [contest.id, level]);
+  const stateDistricts = useMemo(() => ({
+    type: 'FeatureCollection',
+    features: districts?.features?.filter(item => fips(item.properties.stateFips) === fips(contest.state.fips)) || []
+  }), [districts, contest.state.fips]);
 
+  useEffect(() => {
+    setContestId(initialContest.id);
+    setLevel(initialContest.office.slug === 'us_house' ? 'district' : 'county');
+  }, [initialContest.id, initialContest.office.slug]);
   useEffect(() => setSelectedRegion(null), [contest.id, level]);
-  const detail = selectedRegion?.properties;
+  useEffect(() => {
+    if (!precinctMapAvailable && level === 'precinct') setLevel('county');
+  }, [contest.id, precinctMapAvailable, level]);
+  const detail = level === 'district' ? null : selectedRegion?.properties;
   const officeLabel = offices.find(item => item.slug === contest.office.slug)?.short || contest.office.name;
+  const mapCollection = level === 'district' ? stateDistricts : geography.data;
+  const mapLoading = level === 'district' ? !districts : geography.loading;
+  const selectedMapId = level === 'district'
+    ? stateDistricts.features.find(item => item.properties.contestId === contest.id)?.id
+    : selectedRegion?.id;
+  const selectMapRegion = item => {
+    if (level === 'district') {
+      if (item.properties.contestId) setContestId(item.properties.contestId);
+    } else {
+      setSelectedRegion(item);
+    }
+  };
+  const mapTitle = level === 'district'
+    ? `${contest.state.name} congressional districts`
+    : detail?.name || `${contest.state.name} results`;
+  const mapInstruction = level === 'district'
+    ? 'Select a district to update the results.'
+    : `Select a ${level} to see its vote count.`;
 
   return <div className="state-view">
     <div className="breadcrumbs"><button onClick={onBack}>United States</button><span>›</span><strong>{contest.state.name}</strong>{detail && <><span>›</span><strong>{detail.name}</strong></>}</div>
@@ -225,15 +291,19 @@ function StateView({ contests, initialContest, onBack }) {
     <div className="state-grid">
       <section className="map-card state-map-card">
         <div className="map-card-head local-head">
-          <div><h2>{detail ? detail.name : `${contest.state.name} results`}</h2><p>Click a {level} to see its vote count.</p></div>
-          <div className="level-toggle" aria-label="Map detail level"><button className={level === 'county' ? 'active' : ''} onClick={() => setLevel('county')}>Counties</button><button className={level === 'precinct' ? 'active' : ''} onClick={() => setLevel('precinct')}>Precincts</button></div>
+          <div><h2>{mapTitle}</h2><p>{mapInstruction}</p></div>
+          <div className="level-toggle" aria-label="Map detail level">
+            {isHouse && <button className={level === 'district' ? 'active' : ''} onClick={() => setLevel('district')}>Districts</button>}
+            <button className={level === 'county' ? 'active' : ''} onClick={() => setLevel('county')}>Counties</button>
+            {!isHouse && <button className={level === 'precinct' ? 'active' : ''} onClick={() => setLevel('precinct')} disabled={!precinctMapAvailable} title={precinctMapAvailable ? undefined : 'Precinct results require a boundary crosswalk'}>Precincts</button>}
+          </div>
         </div>
-        <div className={`local-map-wrap ${geography.loading ? 'loading' : ''}`}>
-          {geography.loading ? <div className="map-empty"><span className="spinner"/><span>Drawing {level} map…</span></div>
+        <div className={`local-map-wrap ${mapLoading ? 'loading' : ''}`}>
+          {mapLoading ? <div className="map-empty"><span className="spinner"/><span>Drawing {level} map…</span></div>
             : geography.error ? <div className="map-empty error"><strong>Could not load the map</strong><span>{geography.error.message}</span></div>
-              : <LocalMap collection={geography.data} selectedId={selectedRegion?.id} onSelect={setSelectedRegion} level={level}/>}
+              : <LocalMap collection={mapCollection} selectedId={selectedMapId} onSelect={selectMapRegion} level={level}/>}
         </div>
-        <footer><span><i className="source-dot"/>{contest.source}</span><span>{level === 'county' ? 'County totals are summed from imported precinct returns.' : 'Precinct votes are allocated by VEST from source reporting units.'}</span></footer>
+        <footer><span><i className="source-dot"/>{level === 'district' ? 'U.S. Census Bureau boundaries' : contest.source}</span><span>{level === 'district' ? '116th Congress boundaries used for the 2020 election.' : contest.source === 'MIT Election Data and Science Lab' ? 'County totals are aggregated from MEDSL precinct and voting-mode rows.' : level === 'county' ? 'County totals are summed from imported precinct returns.' : 'Precinct votes are allocated by VEST from source reporting units.'}</span></footer>
       </section>
       <aside className="state-results">
         {contests.length > 1 && <label className="contest-select">Contest<select value={contestId} onChange={event => setContestId(event.target.value)}>{contests.map(item => <option key={item.id} value={item.id}>{item.districtLabel || item.name}</option>)}</select></label>}
@@ -246,45 +316,82 @@ function StateView({ contests, initialContest, onBack }) {
         />
         <div className="metadata-card">
           <span className="section-label">RESULT DETAILS</span>
-          <dl><dt>Election date</dt><dd>{new Date(`${contest.electionDate}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</dd><dt>Reporting</dt><dd>{contest.reporting == null ? 'Unknown' : `${contest.reporting}%`}</dd><dt>Source</dt><dd>{contest.source}</dd><dt>Geography</dt><dd>{detail ? level : 'Statewide'}</dd></dl>
-          {(detail?.isEstimated ?? true) && <p>Precinct-level VEST values are allocated from source reporting units. County totals shown here are derived from those precinct values.</p>}
+          <dl><dt>Election date</dt><dd>{new Date(`${contest.electionDate}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</dd><dt>Reporting</dt><dd>{contest.reporting == null ? 'Unknown' : `${contest.reporting}%`}</dd><dt>Source</dt><dd>{contest.source}</dd><dt>Geography</dt><dd>{detail ? level : isHouse ? contest.districtLabel : 'Statewide'}</dd></dl>
+          {level !== 'district' && (detail?.isEstimated ?? true) && <p>Precinct-level VEST values are allocated from source reporting units. County totals shown here are derived from those precinct values.</p>}
         </div>
       </aside>
     </div>
   </div>;
 }
 
+function StateUnavailable({ state, officeLabel, cycle, onBack }) {
+  return <div className="state-view">
+    <div className="breadcrumbs"><button onClick={onBack}>United States</button><span>›</span><strong>{state.name}</strong></div>
+    <div className="state-heading">
+      <div><span className="section-label">STATE EXPLORER</span><h1>{state.name}</h1><p>{cycle} {officeLabel} · general election</p></div>
+      <button className="back-button" onClick={onBack}>← Back to U.S. map</button>
+    </div>
+    <section className="map-card state-unavailable" aria-live="polite">
+      <strong>No matching results have been imported.</strong>
+      <p>{state.name} remains selected. Choose another office or year above, or return to the national map.</p>
+    </section>
+  </div>;
+}
+
 function App() {
   const [office, setOffice] = useState('president');
   const [cycle, setCycle] = useState(2020);
-  const [stateContests, setStateContests] = useState(null);
+  const [selectedState, setSelectedState] = useState(null);
+  const [selectedContestId, setSelectedContestId] = useState(null);
   const options = useJson('/api/hub/options', []);
   const overview = useJson(`/api/hub/overview?office=${office}&cycle=${cycle}&stage=general`, [office, cycle]);
+  const districtGeometry = useJson(
+    office === 'us_house' ? `/api/hub/districts?cycle=${cycle}&stage=general` : null,
+    [office, cycle]
+  );
   const storage = useJson('/api/storage', []);
 
   const officeOption = options.data?.offices?.find(item => item.slug === office);
   const cycles = officeOption?.cycles?.length ? officeOption.cycles : [2020];
   const officeLabel = offices.find(item => item.slug === office)?.short || office;
+  const stateContests = useMemo(() => {
+    if (!selectedState || !overview.data) return [];
+    return overview.data
+      .filter(contest => fips(contest.state.fips) === fips(selectedState.fips))
+      .sort((left, right) => (left.districtLabel || '').localeCompare(
+        right.districtLabel || '', undefined, { numeric: true }
+      ));
+  }, [overview.data, selectedState]);
 
   useEffect(() => {
     if (!cycles.includes(cycle)) setCycle(cycles[0]);
   }, [office, options.data]);
-  useEffect(() => setStateContests(null), [office, cycle]);
+  useEffect(() => setSelectedContestId(null), [office, cycle]);
 
-  const goNational = () => setStateContests(null);
-  const changeOffice = slug => { setOffice(slug); setStateContests(null); };
+  const goNational = () => {
+    setSelectedState(null);
+    setSelectedContestId(null);
+  };
+  const changeOffice = slug => setOffice(slug);
+  const enterState = (contests, preferredContestId = null) => {
+    setSelectedState(contests[0].state);
+    setSelectedContestId(preferredContestId);
+  };
+  const initialContest = stateContests.find(contest => contest.id === selectedContestId) || stateContests[0];
 
   return <div className="app-shell">
-    <Sidebar storage={storage.data} national={!stateContests} onNational={goNational}/>
+    <Sidebar storage={storage.data} national={!selectedState} onNational={goNational}/>
     <main>
-      <header className="topbar"><div><span className="topbar-title">ELECTION DATA CENTER</span><span className="topbar-path">{stateContests ? stateContests[0].state.name : 'United States'}</span></div><div className="top-status"><i/> Historical archive connected</div></header>
+      <header className="topbar"><div><span className="topbar-title">ELECTION DATA CENTER</span><span className="topbar-path">{selectedState?.name || 'United States'}</span></div><div className="top-status"><i/> Historical archive connected</div></header>
       <OfficeControls office={office} onOffice={changeOffice} cycles={cycles} cycle={cycle} onCycle={setCycle}/>
       <div className="workspace">
         {overview.error ? <div className="page-error"><strong>The election hub could not load.</strong><span>{overview.error.message}</span></div>
           : overview.loading ? <div className="page-loading"><span className="spinner"/><strong>Loading election results…</strong></div>
-            : stateContests
-              ? <StateView contests={stateContests} initialContest={stateContests[0]} onBack={goNational}/>
-              : <NationalMap contests={overview.data || []} officeLabel={officeLabel} cycle={cycle} onSelect={setStateContests}/>}
+            : selectedState
+              ? stateContests.length
+                ? <StateView contests={stateContests} initialContest={initialContest} districts={districtGeometry.data} onBack={goNational}/>
+                : <StateUnavailable state={selectedState} officeLabel={officeLabel} cycle={cycle} onBack={goNational}/>
+              : <NationalMap contests={overview.data || []} districts={districtGeometry.data} office={office} officeLabel={officeLabel} cycle={cycle} onSelect={enterState}/>}
       </div>
     </main>
   </div>;
