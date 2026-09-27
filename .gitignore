@@ -4,5 +4,11 @@ node_modules
 .tmp
 data
 dist
+__pycache__/
+*.py[cod]
 /dataverse_files.zip
 /us_house_2020.zip
+/2024_results/
+/tlgpkg_2026_us_legislative.gpkg.zip
+/ballotpedia_2026_congressional_candidates.csv
+/polling/

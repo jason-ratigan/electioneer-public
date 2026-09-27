@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: signal
       POSTGRES_PASSWORD: signal
     ports:
-      - "55432:5432"
+      - "127.0.0.1:15432:5432"
     volumes:
       - signal-postgres-data:/var/lib/postgresql/data
     healthcheck:

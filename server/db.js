@@ -10,7 +10,7 @@ const migrationsDirectory = path.resolve(
 );
 
 export const db = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://signal:signal@localhost:55432/signal',
+  connectionString: process.env.DATABASE_URL || 'postgresql://signal:signal@localhost:15432/signal',
   max: Number(process.env.DATABASE_POOL_SIZE || 10),
   ssl: process.env.DATABASE_SSL === 'true'
     ? { rejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false' }
