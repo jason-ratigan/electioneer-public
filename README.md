@@ -163,6 +163,7 @@ The older Ballotpedia live collector remains in the repository for reproducibili
 - `GET /api/archive/facets`
 - `GET /api/hub/options`
 - `GET /api/hub/overview?office=president&cycle=2020&stage=general`
+- `GET /api/hub/electoral-college?cycle=2024`
 - `GET /api/hub/districts?cycle=2020&stage=general`
 - `GET /api/hub/contests/:id/geographies?level=county|precinct`
 - `GET /api/races/:id/history`
@@ -170,7 +171,7 @@ The older Ballotpedia live collector remains in the repository for reproducibili
 - `GET /api/ingest-runs`
 - `POST /api/refresh` (returns `501` until the selected source adapter exists)
 
-There is deliberately no generic result-write endpoint. Results enter through validated, source-specific importers that create provenance records, immutable result batches, snapshots, reporting status, and vote totals in one transaction.
+There is deliberately no generic result-write endpoint. Results enter through validated, source-specific importers that create provenance records, immutable result batches, snapshots, reporting status, and vote totals in one transaction. Presidential Electoral College data has its own state allocations and append-only future update path; see the [Electoral College guide](docs/electoral-college.md).
 
 ## Normalized data model
 
@@ -204,11 +205,12 @@ There is deliberately no generic result-write endpoint. Results enter through va
 4. Official-source precedence and correction rules for manual election-night refreshes.
 5. PostgreSQL backup, retention, and deployment-provider preferences.
 
-The database starts empty. No candidate, polling, or result records are illustrative or auto-seeded.
+The database starts without popular vote, candidate, or polling records. Certified presidential Electoral College results for 2000–2024 and 2028 allocations are seeded from the National Archives.
 
 ## Planning documents
 
 - [Collection and processing plan](docs/data-collection-plan.md)
 - [VEST 2020 source mapping](docs/vest-2020-mapping.md)
 - [Presidential primary delegate model](docs/presidential-delegate-model.md)
+- [Presidential Electoral College results](docs/electoral-college.md)
 - [Data-source research register](docs/source-research.md)

@@ -18,6 +18,8 @@
     "import:vest:2020": "node server/importers/vest2020/nationalCli.js",
     "import:medsl:house:2020": "node server/importers/medsl2020/houseCli.js",
     "import:medsl:2024": "node server/importers/medsl2024/cli.js",
+    "import:electoral": "node server/electoral/cli.js",
+    "test:electoral": "node --test --experimental-test-isolation=none server/tests/electoralCollege.test.js",
     "import:ballotpedia:candidates:2026": "node server/importers/ballotpedia2026/cli.js",
     "sync:ballotpedia:nominees:2026": "node server/importers/ballotpedia2026/nomineesCli.js",
     "sync:wikimedia:nominees:2026": "node server/importers/wikipedia2026/cli.js",

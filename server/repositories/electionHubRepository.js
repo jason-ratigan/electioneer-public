@@ -169,7 +169,10 @@ export const electionHubRepository = {
       JOIN election_events election ON election.id = contest.election_id
       JOIN result_snapshots snapshot ON snapshot.contest_id = contest.id
       WHERE office.slug IN ('president', 'governor', 'us_house', 'us_senate')
-      ORDER BY office.name, election.cycle DESC, election.stage
+      UNION
+      SELECT 'president', 'President', cycle, 'general'
+      FROM presidential_electoral_states
+      ORDER BY office_name, cycle DESC, stage
     `);
     const [{ poll_count: pollCount }] = await all('SELECT COUNT(*)::INTEGER AS poll_count FROM polls');
     const [{ live_count: liveCount }] = await all(`
