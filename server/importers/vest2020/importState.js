@@ -537,7 +537,7 @@ async function recordFailedRun(runId, startedAt, state, message) {
   }
 }
 
-async function persistState(client, outer, archive, parsed, state, context) {
+export async function persistState(client, outer, archive, parsed, state, context) {
   const source = await sourceId(client);
   await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [`vest:2020:${state.code}:import`]);
   await client.query(`

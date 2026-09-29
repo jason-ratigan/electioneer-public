@@ -70,31 +70,34 @@ async function ensureArtifact(client, source, archive) {
   ])).id;
 }
 
-async function ensureElection(client, source, state, stateGeographyId) {
+async function ensureElection(client, source, state, stateGeographyId, parsedContest) {
+  const stage = parsedContest.special ? 'special' : 'general';
+  const date = parsedContest.electionDate || electionDate;
   const existing = await client.query(`
     SELECT id
     FROM election_events
-    WHERE scope_geography_id = $1 AND cycle = 2020 AND stage = 'general'
+    WHERE scope_geography_id = $1 AND cycle = 2020 AND stage = $3
       AND end_date = $2
     ORDER BY id
     LIMIT 1
-  `, [stateGeographyId, electionDate]);
+  `, [stateGeographyId, date, stage]);
   const electionId = existing.rows[0]?.id || (await row(client, `
     INSERT INTO election_events (
       name, cycle, stage, start_date, end_date, scope_geography_id, metadata
-    ) VALUES ($1, 2020, 'general', $2, $2, $3, $4::JSONB)
+    ) VALUES ($1, 2020, $5, $2, $2, $3, $4::JSONB)
     RETURNING id
   `, [
-    `2020 ${state.name} General Election`,
-    electionDate,
+    `2020 ${state.name} ${parsedContest.special ? 'Special' : 'General'} Election`,
+    date,
     stateGeographyId,
     JSON.stringify({
       source: 'MEDSL 2020 official precinct returns',
       sourceMarksSpecial: parsedContest.special
-    })
+    }),
+    stage
   ])).id;
   await linkSourceId(client, 'election_source_ids', 'election_id', electionId, source,
-    `2020-general:${state.abbreviation}`);
+    `2020-${stage}:${state.abbreviation}${parsedContest.special ? `:${date}` : ''}`);
   return electionId;
 }
 
@@ -254,12 +257,12 @@ async function countyMap(client, stateFips) {
   return new Map(result.rows.map(item => [item.county_fips, item.id]));
 }
 
-export async function importHouseResults({ archive, parsed, commit = false, onProgress }) {
-  const client = await db.connect();
+export async function importHouseResults({ archive, parsed, commit = false, onProgress, transactionClient }) {
+  const client = transactionClient || await db.connect();
   const runId = randomUUID();
   const startedAt = new Date().toISOString();
   try {
-    await client.query('BEGIN');
+    if (!transactionClient) await client.query('BEGIN');
     const source = await sourceId(client);
     await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', ['medsl:2020:house:import']);
     const artifactId = await ensureArtifact(client, source, archive);
@@ -267,7 +270,7 @@ export async function importHouseResults({ archive, parsed, commit = false, onPr
       SELECT id FROM result_batches WHERE source_id = $1 AND source_artifact_id = $2 LIMIT 1
     `, [source, artifactId]);
     if (existingBatch.rows.length) {
-      await client.query('ROLLBACK');
+      if (!transactionClient) await client.query('ROLLBACK');
       return { alreadyImported: true, batchId: String(existingBatch.rows[0].id) };
     }
     await client.query(`
@@ -308,9 +311,9 @@ export async function importHouseResults({ archive, parsed, commit = false, onPr
       const stateGeography = await row(client, `
         SELECT id FROM geographies WHERE geography_type = 'state' AND state_fips = $1
       `, [state.stateFips]);
-      const electionId = await ensureElection(client, source, state, stateGeography.id);
       const counties = await countyMap(client, state.stateFips);
       for (const parsedContest of state.contests) {
+        const electionId = await ensureElection(client, source, state, stateGeography.id, parsedContest);
         const districtId = await ensureDistrict(client, source, state, stateGeography.id, parsedContest);
         const contestId = await ensureContest(client, source, electionId, officeId, districtId, parsedContest);
         const choices = new Map();
@@ -445,13 +448,15 @@ export async function importHouseResults({ archive, parsed, commit = false, onPr
       invalidCountyRows: parsed.invalidCountyRows,
       missingCountyRows
     };
-    if (commit) await client.query('COMMIT');
-    else await client.query('ROLLBACK');
+    if (!transactionClient) {
+      if (commit) await client.query('COMMIT');
+      else await client.query('ROLLBACK');
+    }
     return result;
   } catch (error) {
-    await client.query('ROLLBACK');
+    if (!transactionClient) await client.query('ROLLBACK');
     throw error;
   } finally {
-    client.release();
+    if (!transactionClient) client.release();
   }
 }

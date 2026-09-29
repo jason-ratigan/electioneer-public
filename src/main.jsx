@@ -4,6 +4,8 @@ import { geoAlbersUsa, geoMercator, geoPath } from 'd3-geo';
 import { feature, mesh } from 'topojson-client';
 import statesTopology from 'us-atlas/states-10m.json';
 import '../styles.css';
+import { AdminImports, PollsView } from './Imports.jsx';
+import { Explorer } from './Explorer.jsx';
 
 const offices = [
   { slug: 'president', label: 'Presidential', short: 'President' },
@@ -64,21 +66,22 @@ function Icon({ children }) {
   return <span className="nav-icon" aria-hidden="true">{children}</span>;
 }
 
-function Sidebar({ storage, national, onNational }) {
+function Sidebar({ storage, national, onNational, view, onView }) {
   return <aside className="sidebar">
-    <button className="brand" onClick={onNational} aria-label="Signal election hub home">
+    <button className="brand" onClick={() => onView('explore')} aria-label="Signal election hub home">
       <span className="brand-mark">S</span><span>signal</span>
     </button>
     <nav aria-label="Primary navigation">
-      <button className={`nav-item ${national ? 'active' : ''}`} onClick={onNational}><Icon>⌂</Icon><span>Election hub</span></button>
-      <button className="nav-item" onClick={onNational}><Icon>◎</Icon><span>Historical results</span></button>
-      <button className="nav-item" disabled title="No polling data has been imported"><Icon>⌁</Icon><span>Polls</span><small>No data</small></button>
+      <button className={`nav-item ${view === 'explore' ? 'active' : ''}`} onClick={() => onView('explore')}><Icon>⌂</Icon><span>Election map</span></button>
+      <button className={`nav-item ${view === 'hub' ? 'active' : ''}`} onClick={onNational}><Icon>◎</Icon><span>Historical results</span></button>
+      <button className={`nav-item ${view === 'polls' ? 'active' : ''}`} onClick={() => onView('polls')}><Icon>⌁</Icon><span>Poll library</span></button>
+      <button className={`nav-item ${view === 'admin' ? 'active' : ''}`} onClick={() => onView('admin')}><Icon>↑</Icon><span>Admin imports</span></button>
       <button className="nav-item" disabled title="No live election feed is configured"><Icon>◉</Icon><span>Election night</span><small>Offline</small></button>
     </nav>
     <div className="sidebar-context">
       <span className="context-label">AVAILABLE DATA</span>
-      <strong>Presidential · 2000–2028</strong>
-      <p>Electoral College results and allocations; popular votes where imported</p>
+      <strong>Maps, polling and history</strong>
+      <p>Explore Senate, governor and House races, national opinion, and the historical archive.</p>
     </div>
     <div className="sidebar-bottom">
       <div className="live-card"><span className="pulse"/><div><strong>PostgreSQL archive</strong><small>{storage ? `${storage.megabytes} MB · ${formatNumber.format(storage.vote_totals)} vote rows` : 'Checking database…'}</small></div></div>
@@ -86,7 +89,7 @@ function Sidebar({ storage, national, onNational }) {
   </aside>;
 }
 
-function OfficeControls({ office, onOffice, cycles, cycle, onCycle }) {
+function OfficeControls({ office, onOffice, cycles, cycle, onCycle, onPolls, stages, stage, onStage }) {
   return <div className="control-strip">
     <div className="office-tabs" role="tablist" aria-label="Office">
       {offices.map(item => <button
@@ -99,9 +102,10 @@ function OfficeControls({ office, onOffice, cycles, cycle, onCycle }) {
     </div>
     <div className="view-controls">
       <label>Year<select value={cycle} onChange={event => onCycle(Number(event.target.value))}>{cycles.map(year => <option key={year} value={year}>{year}</option>)}</select></label>
+      <label>Stage<select value={stage} onChange={event => onStage(event.target.value)}>{stages.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
       <div className="mode-toggle" aria-label="Data mode">
         <button className="active">Historical</button>
-        <button disabled title="No polling data imported">Polls</button>
+        <button onClick={onPolls}>Polling map</button>
         <button disabled title="No live feed configured">Election night</button>
       </div>
     </div>
@@ -352,6 +356,7 @@ function StateView({ contests, initialContest, districts, electoral, onBack }) {
         </div>
       </aside>
     </div>
+    <PollsView compact initialState={contest.state.abbreviation} initialOffice={contest.office.slug} initialCycle={contest.cycle} initialStage={contest.stage}/>
   </div>;
 }
 
@@ -382,21 +387,36 @@ function StateUnavailable({ state, officeLabel, cycle, onBack }) {
 }
 
 function App() {
+  const [view, setView] = useState(window.location.hash === '#admin' ? 'admin' : window.location.hash === '#polls' ? 'polls' : window.location.hash === '#hub' ? 'hub' : 'explore');
+  const [revision, setRevision] = useState(0);
+  const [explorerHash, setExplorerHash] = useState(window.location.hash.startsWith('#explore') ? window.location.hash : '#explore');
   const [office, setOffice] = useState('president');
   const [cycle, setCycle] = useState(2020);
+  const [stage, setStage] = useState('general');
   const [selectedState, setSelectedState] = useState(null);
   const [selectedContestId, setSelectedContestId] = useState(null);
-  const options = useJson('/api/hub/options', []);
-  const overview = useJson(`/api/hub/overview?office=${office}&cycle=${cycle}&stage=general`, [office, cycle]);
-  const electoral = useJson(office === 'president' ? `/api/hub/electoral-college?cycle=${cycle}` : null, [office, cycle]);
+  const options = useJson('/api/hub/options', [revision]);
+  const overview = useJson(`/api/hub/overview?office=${office}&cycle=${cycle}&stage=${stage}`, [office, cycle, stage, revision]);
+  const electoral = useJson(office === 'president' && stage === 'general' ? `/api/hub/electoral-college?cycle=${cycle}` : null, [office, cycle, stage, revision]);
   const districtGeometry = useJson(
-    office === 'us_house' ? `/api/hub/districts?cycle=${cycle}&stage=general` : null,
-    [office, cycle]
+    office === 'us_house' ? `/api/hub/districts?cycle=${cycle}&stage=${stage}` : null,
+    [office, cycle, stage, revision]
   );
-  const storage = useJson('/api/storage', []);
+  const storage = useJson('/api/storage', [revision]);
+  const navigate = value => {
+    if (window.location.hash.startsWith('#explore')) setExplorerHash(window.location.hash);
+    setView(value);
+    window.location.hash = value === 'explore' ? (window.location.hash.startsWith('#explore') ? window.location.hash : explorerHash) : value;
+  };
+  useEffect(() => {
+    const changed = () => setView(['#admin', '#polls', '#hub'].includes(window.location.hash) ? window.location.hash.slice(1) : 'explore');
+    window.addEventListener('hashchange', changed);
+    return () => window.removeEventListener('hashchange', changed);
+  }, []);
 
   const officeOption = options.data?.offices?.find(item => item.slug === office);
   const cycles = officeOption?.cycles?.length ? officeOption.cycles : [2020];
+  const stages = officeOption?.stages?.length ? officeOption.stages : ['general'];
   const officeLabel = offices.find(item => item.slug === office)?.short || office;
   const stateContests = useMemo(() => {
     if (!selectedState || !overview.data) return [];
@@ -409,10 +429,12 @@ function App() {
 
   useEffect(() => {
     if (!cycles.includes(cycle)) setCycle(cycles[0]);
+    if (!stages.includes(stage)) setStage(stages[0]);
   }, [office, options.data]);
-  useEffect(() => setSelectedContestId(null), [office, cycle]);
+  useEffect(() => setSelectedContestId(null), [office, cycle, stage]);
 
   const goNational = () => {
+    navigate('hub');
     setSelectedState(null);
     setSelectedContestId(null);
   };
@@ -428,12 +450,15 @@ function App() {
   const initialContest = stateContests.find(contest => contest.id === selectedContestId) || stateContests[0];
 
   return <div className="app-shell">
-    <Sidebar storage={storage.data} national={!selectedState} onNational={goNational}/>
+    <Sidebar storage={storage.data} national={view === 'hub' && !selectedState} onNational={goNational} view={view} onView={navigate}/>
     <main>
-      <header className="topbar"><div><span className="topbar-title">ELECTION DATA CENTER</span><span className="topbar-path">{selectedState?.name || 'United States'}</span></div><div className="top-status"><i/> Historical archive connected</div></header>
-      <OfficeControls office={office} onOffice={changeOffice} cycles={cycles} cycle={cycle} onCycle={setCycle}/>
+      <header className="topbar"><div><span className="topbar-title">ELECTION DATA CENTER</span><span className="topbar-path">{view === 'explore' ? 'Polling explorer' : selectedState?.name || 'United States'}</span></div><div className="top-status"><i/> Polling and historical archive</div></header>
+      {view === 'hub' && <OfficeControls office={office} onOffice={changeOffice} cycles={cycles} cycle={cycle} onCycle={setCycle} stages={stages} stage={stage} onStage={setStage} onPolls={() => navigate('explore')}/>}
       <div className="workspace">
-        {overview.error || electoral.error ? <div className="page-error"><strong>The election hub could not load.</strong><span>{(overview.error || electoral.error).message}</span></div>
+        {view === 'admin' ? <AdminImports onPublished={() => setRevision(value => value + 1)}/>
+          : view === 'explore' ? <Explorer revision={revision} onHistory={({office: nextOffice,state,cycle: nextCycle}) => {setOffice(nextOffice);setCycle(nextCycle);setStage('general');setSelectedContestId(null);setSelectedState(state);navigate('hub');}}/>
+          : view === 'polls' ? <PollsView/>
+          : overview.error || electoral.error ? <div className="page-error"><strong>The election hub could not load.</strong><span>{(overview.error || electoral.error).message}</span></div>
           : overview.loading || electoral.loading ? <div className="page-loading"><span className="spinner"/><strong>Loading election results…</strong></div>
             : selectedState
               ? stateContests.length

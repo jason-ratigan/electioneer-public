@@ -14,7 +14,7 @@ async function row(client, sql, params = []) {
   return result.rows[0];
 }
 
-async function linkSourceId(client, table, entityColumn, entityId, source, sourceIdentifier) {
+async function linkSourceId(client, table, entityColumn, entityId, source, sourceIdentifier, identifierNamespace = namespace) {
   const allowed = new Map([
     ['geography_source_ids', 'geography_id'],
     ['candidate_source_ids', 'candidate_id'],
@@ -28,13 +28,13 @@ async function linkSourceId(client, table, entityColumn, entityId, source, sourc
     VALUES ($1, $2, $3, $4)
     ON CONFLICT (source_id, identifier_namespace, source_identifier) DO NOTHING
     RETURNING ${entityColumn}
-  `, [entityId, source, namespace, sourceIdentifier]);
+  `, [entityId, source, identifierNamespace, sourceIdentifier]);
   if (linked.rows.length) return;
   const existing = await row(client, `
     SELECT ${entityColumn}
     FROM ${table}
     WHERE source_id = $1 AND identifier_namespace = $2 AND source_identifier = $3
-  `, [source, namespace, sourceIdentifier]);
+  `, [source, identifierNamespace, sourceIdentifier]);
   if (String(existing[entityColumn]) !== String(entityId)) {
     throw new Error(`${table} identifier ${sourceIdentifier} is already mapped to another entity`);
   }
@@ -50,7 +50,7 @@ async function ensureArtifact(client, source, archive, state) {
     INSERT INTO source_artifacts (
       source_id, uri, retrieved_at, sha256, byte_size, content_type,
       source_version, metadata
-    ) VALUES ($1, $2, $3, $4, $5, 'application/zip', '2024 general', $6::JSONB)
+    ) VALUES ($1, $2, $3, $4, $5, $7, '2024 general', $6::JSONB)
     RETURNING id
   `, [
     source,
@@ -64,31 +64,33 @@ async function ensureArtifact(client, source, archive, state) {
       csvByteSize: archive.csvByteSize,
       state: state.abbreviation,
       officialRepository: 'https://github.com/MEDSL/2024-elections-official'
-    })
+    }),
+    archive.contentType || 'application/zip'
   ])).id;
 }
 
-async function ensureElection(client, source, state, stateGeographyId) {
+async function ensureElection(client, source, state, stateGeographyId, special = false) {
   const existing = await client.query(`
     SELECT id FROM election_events
-    WHERE scope_geography_id = $1 AND cycle = 2024 AND stage = 'general'
+    WHERE scope_geography_id = $1 AND cycle = 2024 AND stage = $3
       AND end_date = $2
     ORDER BY id LIMIT 1
-  `, [stateGeographyId, state.date]);
+  `, [stateGeographyId, state.date, special ? 'special' : 'general']);
   const electionId = existing.rows[0]?.id || (await row(client, `
     INSERT INTO election_events (
       name, cycle, stage, start_date, end_date, scope_geography_id, metadata
-    ) VALUES ($1, 2024, 'general', $2, $2, $3, $4::JSONB)
+    ) VALUES ($1, 2024, $5, $2, $2, $3, $4::JSONB)
     RETURNING id
   `, [
-    `2024 ${state.name} General Election`,
+    `2024 ${state.name} ${special ? 'Special' : 'General'} Election`,
     state.date,
     stateGeographyId,
-    JSON.stringify({ source: 'MEDSL 2024 official precinct returns' })
+    JSON.stringify({ source: 'MEDSL 2024 official precinct returns' }),
+    special ? 'special' : 'general'
   ])).id;
   await linkSourceId(
     client, 'election_source_ids', 'election_id', electionId, source,
-    `2024-general:${state.abbreviation}`
+    `2024-${special ? 'special' : 'general'}:${state.abbreviation}`
   );
   return electionId;
 }
@@ -156,7 +158,8 @@ async function ensureContest(client, source, electionId, officeId, districtId, c
     JSON.stringify({ source: 'MEDSL 2024 official precinct returns', special: contest.special })
   ])).id;
   await linkSourceId(
-    client, 'contest_source_ids', 'contest_id', contestId, source, contest.sourceIdentifier
+    client, 'contest_source_ids', 'contest_id', contestId, source, contest.sourceIdentifier,
+    contest.adminSpecial ? 'medsl:2024:special' : namespace
   );
   return contestId;
 }
@@ -245,7 +248,8 @@ async function ensureChoice(client, source, officeId, state, contestId, contest,
   }
   await linkSourceId(
     client, 'contest_choice_source_ids', 'contest_choice_id', choiceId, source,
-    `${contest.sourceIdentifier}:${choice.sourceIdentifier}`
+    `${contest.sourceIdentifier}:${choice.sourceIdentifier}`,
+    contest.adminSpecial ? 'medsl:2024:special' : namespace
   );
   return choiceId;
 }
@@ -258,7 +262,7 @@ async function countyMap(client, stateFips) {
   return new Map(result.rows.map(item => [item.county_fips, item.id]));
 }
 
-async function storeState(client, source, runId, archive, state, officeIds) {
+export async function storeState(client, source, runId, archive, state, officeIds) {
   const artifactId = await ensureArtifact(client, source, archive, state);
   const existingBatch = await client.query(`
     SELECT id FROM result_batches
@@ -270,7 +274,6 @@ async function storeState(client, source, runId, archive, state, officeIds) {
   const stateGeography = await row(client, `
     SELECT id FROM geographies WHERE geography_type = 'state' AND state_fips = $1
   `, [state.stateFips]);
-  const electionId = await ensureElection(client, source, state, stateGeography.id);
   const counties = await countyMap(client, state.stateFips);
   const batch = await row(client, `
     INSERT INTO result_batches (
@@ -292,6 +295,8 @@ async function storeState(client, source, runId, archive, state, officeIds) {
   let invalidAggregateTotals = 0;
 
   for (const contest of state.contests) {
+    contest.adminSpecial = Boolean(archive.adminImport && contest.special);
+    const electionId = await ensureElection(client, source, state, stateGeography.id, archive.adminImport && contest.special);
     const officeId = officeIds.get(contest.officeSlug);
     if (!officeId) throw new Error(`Missing office ${contest.officeSlug}`);
     const districtId = await ensureDistrict(client, source, state, stateGeography.id, contest);

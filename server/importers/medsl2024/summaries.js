@@ -64,7 +64,7 @@ function party(row) {
   return { name: titleCase(value), abbreviation: 'O' };
 }
 
-async function readSummaryFile(filePath) {
+export async function readSummaryFile(filePath) {
   const reader = createInterface({ input: createReadStream(filePath), crlfDelay: Infinity });
   let header;
   let classification;

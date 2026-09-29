@@ -43,6 +43,19 @@ main{margin-left:232px;min-height:100vh}
 .mode-toggle button:disabled{cursor:not-allowed;opacity:.42}
 .workspace{padding:27px 34px 40px;max-width:1780px;margin:0 auto}
 .map-card,.result-list,.metadata-card,.electoral-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+.electoral-card{padding:19px 22px;margin-bottom:18px}
+.state-results .electoral-card{margin-bottom:0}
+.electoral-card-head{display:flex;align-items:start;justify-content:space-between;gap:16px}
+.electoral-card-head h2{font:700 18px 'Libre Franklin';margin:5px 0 0}
+.electoral-card-head>strong{text-align:right;font:700 25px 'Libre Franklin'}
+.electoral-card-head>strong small{display:block;color:var(--muted);font:500 10px 'DM Mono';margin-top:4px;white-space:nowrap}
+.electoral-choices{display:flex;flex-wrap:wrap;gap:9px;margin-top:17px}
+.electoral-choice{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:11px}
+.electoral-choice i{width:9px;height:9px;border-radius:50%}
+.electoral-choice strong{font:700 15px 'DM Mono';margin-left:8px}
+.electoral-card p,.electoral-context{font-size:11px;color:var(--muted);margin:13px 0 0}
+.electoral-card footer{border-top:1px solid var(--line);padding-top:11px;margin-top:15px;color:var(--muted);font-size:10px}
+.electoral-card a{color:var(--blue)}
 .map-card{overflow:hidden}
 .map-card-head{min-height:82px;padding:18px 22px 13px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
 .map-card-head h1,.state-heading h1{font:800 29px/1.15 'Libre Franklin';letter-spacing:-1px;margin:6px 0}
@@ -128,17 +141,33 @@ main{margin-left:232px;min-height:100vh}
 @media(max-width:1180px){.control-strip{align-items:flex-start}.view-controls{align-items:flex-end;flex-direction:column}.state-grid{grid-template-columns:1fr}.state-results{display:grid;grid-template-columns:1fr 1fr}.contest-select{grid-column:1/-1}.national-map-card .map-stage{min-height:460px}}
 @media(max-width:880px){.sidebar{width:78px;padding-left:12px;padding-right:12px}.brand{padding:0;justify-content:center}.brand>span:last-child,.nav-item>span:nth-child(2),.nav-item small,.sidebar-context,.live-card div{display:none}.nav-item{display:flex;justify-content:center;padding:12px}.live-card{justify-content:center;padding:14px 8px}main{margin-left:78px}.control-strip{display:block}.office-tabs{overflow-x:auto;padding-bottom:8px}.view-controls{margin-top:8px;flex-direction:row;align-items:center;justify-content:space-between}.workspace{padding-left:20px;padding-right:20px}.map-stage{min-height:400px}.map-card footer{display:block}.map-card footer span+span{margin-top:7px}.state-results{grid-template-columns:1fr 1fr}}
 @media(max-width:650px){.sidebar{position:static;width:100%;height:58px;flex-direction:row;align-items:center;padding:10px 14px}.brand{margin:0 16px 0 0}.brand>span:last-child{display:block}.sidebar nav{flex-direction:row}.nav-item{width:auto;padding:9px}.nav-item:not(.active){display:none}.sidebar-bottom{margin:0 0 0 auto}.live-card{border:0;background:none;padding:8px}.pulse{box-shadow:none}main{margin-left:0}.topbar{height:52px;padding:0 16px}.topbar-title{display:none}.topbar-path{border:0;margin:0;padding:0}.top-status{font-size:8px}.control-strip{padding:12px 16px}.office-tabs button{white-space:nowrap;padding:8px 11px}.view-controls{align-items:flex-start;flex-direction:column}.workspace{padding:18px 12px 30px}.map-card-head{display:block}.map-key{margin-top:10px}.map-card-head h1{font-size:23px}.map-stage{min-height:310px;padding:0}.map-notice{top:145px;width:calc(100% - 40px)}.state-heading{align-items:flex-start}.back-button{font-size:0}.back-button::before{content:'←';font-size:16px}.state-grid{display:block}.state-results{display:block}.state-results>*{margin-top:12px}.local-head{display:flex}.local-map-wrap,.local-map{min-height:450px;height:450px}.choice-row{grid-template-columns:8px minmax(90px,1fr) 58px}.choice-bar{display:none}.mode-toggle button{font-size:8px;padding:6px 8px}}
-
-.electoral-card{padding:19px 22px;margin-bottom:18px}
-.state-results .electoral-card{margin-bottom:0}
-.electoral-card-head{display:flex;align-items:start;justify-content:space-between;gap:16px}
-.electoral-card-head h2{font:700 18px 'Libre Franklin';margin:5px 0 0}
-.electoral-card-head>strong{text-align:right;font:700 25px 'Libre Franklin'}
-.electoral-card-head>strong small{display:block;color:var(--muted);font:500 10px 'DM Mono';margin-top:4px;white-space:nowrap}
-.electoral-choices{display:flex;flex-wrap:wrap;gap:9px;margin-top:17px}
-.electoral-choice{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:11px}
-.electoral-choice i{width:9px;height:9px;border-radius:50%}
-.electoral-choice strong{font:700 15px 'DM Mono';margin-left:8px}
-.electoral-card p,.electoral-context{font-size:11px;color:var(--muted);margin:13px 0 0}
-.electoral-card footer{border-top:1px solid var(--line);padding-top:11px;margin-top:15px;color:var(--muted);font-size:10px}
-.electoral-card a{color:var(--blue)}
+/* Source imports and raw polling observations. */
+.import-page,.polls-page { max-width:1200px; margin:0 auto; color:#24334b; }
+.import-page>h1,.polls-page>h1 { margin:8px 0; font-size:30px; }
+.import-page p,.polls-page p { line-height:1.55; }
+.import-panel,.poll-card { background:#fff; border:1px solid #dce3ec; border-radius:12px; padding:22px; margin:18px 0; }
+.import-panel h2,.poll-card h2 { margin:4px 0 12px; font-size:20px; }
+.import-fields,.poll-filters { display:flex; flex-wrap:wrap; gap:16px; margin:16px 0; }
+.import-fields label { flex:1; min-width:220px; }
+.import-page label,.poll-filters label { display:flex; flex-direction:column; gap:8px; font-size:13px; font-weight:600; }
+.import-page input:not([type=checkbox]),.poll-filters select { border:1px solid #cbd5e2; border-radius:6px; padding:10px; background:white; color:#24334b; }
+.primary-button,.poll-pagination button { border:0; border-radius:7px; background:#263f68; color:white; padding:12px 18px; cursor:pointer; margin-top:12px; }
+.primary-button:disabled,.poll-pagination button:disabled { opacity:.4; cursor:default; }
+.upload-zone { border:2px dashed #a9bcd5; background:#f5f8fc; border-radius:9px; padding:26px; text-align:center; align-items:center; }
+.upload-zone strong { font-size:20px; }.upload-zone small { font-weight:400; }
+.import-columns { display:grid; grid-template-columns:270px minmax(0,1fr); gap:20px; align-items:start; }
+.import-history button { display:flex; flex-direction:column; gap:7px; text-align:left; background:#f6f8fb; border:1px solid transparent; border-radius:7px; padding:12px; width:100%; margin:8px 0; cursor:pointer; overflow-wrap:anywhere; }
+.import-history button.selected { border-color:#416bad; background:#eaf1fc; }
+.import-history small { color:#64758b; }.import-history span { text-transform:capitalize; }
+.preview-grid { display:grid; grid-template-columns:150px 1fr; gap:10px; font-size:14px; }.preview-grid dd { margin:0; overflow-wrap:anywhere; }.preview-grid dt { color:#65728a; }
+.preview-counts { display:flex; flex-wrap:wrap; gap:12px; }.preview-counts span { background:#edf3fb; padding:12px; border-radius:8px; }.preview-counts b { font-size:22px; display:block; }
+.import-detail pre,.poll-card pre { white-space:pre-wrap; overflow-wrap:anywhere; max-height:400px; overflow:auto; font-size:12px; background:#f5f7fa; padding:14px; }
+.import-detail code { overflow-wrap:anywhere; font-size:12px; }.import-detail li { margin:10px 0; line-height:1.5; }
+.confirm-import { border-top:1px solid #dce3ec; margin-top:20px; padding-top:20px; }.confirm-import label { display:flex; flex-direction:row; line-height:1.5; }
+.import-error { color:#9f2433; background:#fff0f2; padding:14px; border-radius:8px; }.import-detail progress { width:100%; }
+.poll-distinction { padding:14px 18px; background:#eef3fa; border-left:3px solid #567caa; border-radius:4px; }
+.poll-card-head { display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; font-size:14px; }.poll-card-head p { margin:6px 0; }
+.poll-shares { display:flex; flex-wrap:wrap; gap:10px; margin:18px 0; }.poll-shares>div { display:flex; flex-direction:column; gap:8px; min-width:135px; padding:14px; background:#f4f6f9; border-radius:8px; }.poll-shares strong { font-size:24px; }.poll-shares span { font-size:13px; }
+.poll-card footer { display:flex; flex-wrap:wrap; gap:14px; font-size:12px; color:#60718a; margin:14px 0; }.poll-card details { font-size:12px; }.poll-pagination { display:flex; align-items:center; gap:16px; }.poll-pagination button { margin:0; }
+.averages-table { width:100%; border-collapse:collapse; font-size:14px; }.averages-table th,.averages-table td { text-align:left; padding:10px; border-bottom:1px solid #e7ebf2; }.compact-polls { margin-top:30px; }
+@media(max-width:800px) { .import-columns { grid-template-columns:1fr; }.import-history { max-height:260px; overflow:auto; }.preview-grid { grid-template-columns:110px 1fr; }.averages-table { font-size:12px; }.import-panel { padding:15px; } }

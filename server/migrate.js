@@ -1,3 +1,4 @@
+import './loadEnv.js';
 import { closeDatabase, initializeDatabase } from './db.js';
 
 try {

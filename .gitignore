@@ -12,3 +12,4 @@ __pycache__/
 /tlgpkg_2026_us_legislative.gpkg.zip
 /ballotpedia_2026_congressional_candidates.csv
 /polling/
+/.import-storage/

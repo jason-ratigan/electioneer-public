@@ -27,6 +27,18 @@ The web client runs at `http://localhost:4173`; the API runs at `http://localhos
 
 New databases start empty. Development fixtures and source imports are explicit operations; application startup never inserts illustrative election data.
 
+## Admin CSV and ZIP imports
+
+Open **Admin imports** (`/#admin`) to upload NYT polling CSVs, published approval averages, MEDSL 2024 state precinct downloads, MEDSL 2020 House files, or documented VEST 2020 archives. Set a random `ADMIN_IMPORT_TOKEN` of at least 32 characters in the API process environment first; admin endpoints are disabled without it. The token is entered in the admin page and is never bundled into the client.
+
+Uploads are privately staged and validated asynchronously. Review the source, actual row scope, proposed changes, unresolved mappings and warnings, then explicitly confirm publication. Commit is transactional, retries are idempotent, corrections retain previous observations, and import history includes checksums and audit reports. The **Polls** view now displays individual questions with sample/population, field dates, responses and NYT attribution; Times-published approval averages appear separately from raw polls and model estimates.
+
+See [Admin import workflow, supported formats, attribution and testing](docs/admin-imports.md) for setup, source limitations, ZIP limits and the API. The full 2020 MEDSL and VEST ZIPs were not present for real-file end-to-end verification. The supplied `2024-president-state.csv` is not election data and needs replacing with the real repository download. Other-year MEDSL and primary/runoff result formats require their exact files and codebooks; they are never guessed from a filename.
+
+Run `npm run test:imports` for import parsing, mapping, authentication, revision, idempotency and rollback tests. `npm run test:imports:e2e` exercises upload/preview/confirm/publication against a disposable PostgreSQL database using all supplied NYT files and a real MEDSL ZIP.
+
+For a local bulk update, run `npm run import:admin -- --polling-dir polling` to stage previews, or add `--commit` to explicitly publish the validated files. The command applies migrations and uses the same transaction, provenance and audit pipeline as the admin page. Repeated downloads are safe to rerun.
+
 ## Delaware VEST importer
 
 Place the Harvard Dataverse download at `dataverse_files.zip`, then run the importer without flags to execute a complete validation transaction that is rolled back:
@@ -168,8 +180,10 @@ The older Ballotpedia live collector remains in the repository for reproducibili
 - `GET /api/hub/contests/:id/geographies?level=county|precinct`
 - `GET /api/races/:id/history`
 - `GET /api/storage`
-- `GET /api/ingest-runs`
-- `POST /api/refresh` (returns `501` until the selected source adapter exists)
+- `GET /api/ingest-runs` (administrator authentication required)
+- `POST /api/refresh` (administrator authentication required; legacy route returns `501`)
+- `GET /api/polls`, `GET /api/polls/facets`, `GET /api/poll-averages`
+- `GET /api/admin/imports`, `POST /api/admin/imports`, `GET /api/admin/imports/:id`, `POST /api/admin/imports/:id/commit`, `POST /api/admin/imports/:id/retry` (administrator authentication required)
 
 There is deliberately no generic result-write endpoint. Results enter through validated, source-specific importers that create provenance records, immutable result batches, snapshots, reporting status, and vote totals in one transaction. Presidential Electoral College data has its own state allocations and append-only future update path; see the [Electoral College guide](docs/electoral-college.md).
 
@@ -183,7 +197,8 @@ There is deliberately no generic result-write endpoint. Results enter through va
 - `result_batches` and `result_snapshots` preserve source timestamps and revision history.
 - `vote_totals` stores votes by snapshot, reporting geography, ballot choice, vote type, and tabulation round. Contest-wide totals use the contest district as their reporting unit so detail rows are never accidentally double-counted.
 - `geographies`, `geography_versions`, and `geography_relationships` support dated PostGIS boundaries, containment, reporting relationships, and crosswalk allocations.
-- `polls`, `poll_questions`, and `poll_responses` are separate from official results.
+- `polls`, `poll_questions`, and `poll_responses` are separate from official results. Source questions retain their own sampling and immutable revisions; generic ballot and approval questions do not require a contest.
+- `published_poll_averages` stores attributed publisher time series independently of `model_estimates`. `admin_imports` records staging, confirmation and publication audit state.
 - `model_runs` and `model_estimates` hold poll averages, projections, and election-night scenarios without changing source vote totals.
 - `data_sources`, `source_artifacts`, source-ID mapping tables, and `ingestion_runs` preserve lineage and importer audit data.
 
@@ -193,7 +208,7 @@ There is deliberately no generic result-write endpoint. Results enter through va
 - Primary results and polling observations begin in 2014.
 - Historical municipal, county, local-primary, and ballot-measure records are excluded.
 - Historical statewide offices are excluded except governor; federal offices remain in scope.
-- Refresh is user-initiated through `POST /api/refresh`; there is no scheduler.
+- Source updates are user-initiated through the authenticated admin upload/preview/confirm workflow; there is no source-fetch scheduler.
 - PostgreSQL exposes database size and record counts at `GET /api/storage`.
 - Initial adapters are planned for OpenElections, VEST, state election offices, and optionally AP Elections after credentials are configured. Provider ingestion remains intentionally unimplemented until formats and credentials are supplied.
 
@@ -214,3 +229,8 @@ The database starts without popular vote, candidate, or polling records. Certifi
 - [Presidential primary delegate model](docs/presidential-delegate-model.md)
 - [Presidential Electoral College results](docs/electoral-college.md)
 - [Data-source research register](docs/source-research.md)
+# Map-centered polling explorer
+
+The home page now opens the 2026 polling map. Switch between Senate, governor and House races, travel through polling dates, inspect matchups and source polls, and test chamber-control scenarios. National approval and generic-ballot polling stay in a separate national panel. Historical results and the import workflow remain available from the sidebar.
+
+See [polling outlook methodology and usage](docs/polling-outlook.md) for mapping rules, Senate baseline sources, timeline limitations, test commands and update instructions. This feature uses the existing imported data; no additional migration is required.

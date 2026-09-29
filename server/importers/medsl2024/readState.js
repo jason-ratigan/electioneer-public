@@ -1,4 +1,5 @@
 import { createInterface } from 'node:readline';
+import { createHash } from 'node:crypto';
 import { parseCsvLine } from '../medsl2020/readHouse.js';
 import { resolvePresidentialCandidateName } from '../vest2020/presidentialCandidates.js';
 import { slugifyCandidateName } from '../vest2020/readState.js';
@@ -85,7 +86,7 @@ function geographyScope(row, contest) {
   const locality = /^\d{5}$/.test(county)
     ? county
     : `${row.jurisdiction_fips.trim()}\u001f${row.jurisdiction_name.trim()}\u001f${row.county_name.trim()}`;
-  return `${contest.key}\u001f${locality}`;
+  return `${contest.key}\u001f${locality}\u001f${row.jurisdiction_fips.trim()}\u001f${row.jurisdiction_name.trim()}`;
 }
 
 function normalizedPrecinct(value) {
@@ -118,10 +119,11 @@ function possibleParentPrecincts(detailedPrecinct) {
   return parents;
 }
 
-async function forEachCsvRow(stream, callback) {
+async function forEachCsvRow(stream, callback, onDuplicate) {
   const reader = createInterface({ input: stream, crlfDelay: Infinity });
   let header;
   let lineNumber = 0;
+  const seen = new Set();
   for await (const line of reader) {
     lineNumber += 1;
     if (!header) {
@@ -136,6 +138,9 @@ async function forEachCsvRow(stream, callback) {
       throw new Error(`CSV line ${lineNumber} has ${values.length} fields; expected ${header.length}`);
     }
     const row = Object.fromEntries(header.map((column, index) => [column, values[index].trim()]));
+    const fingerprint = createHash('sha256').update(JSON.stringify(row)).digest('hex');
+    if (seen.has(fingerprint)) { onDuplicate?.(); continue; }
+    seen.add(fingerprint);
     await callback(row, lineNumber);
   }
   if (!header) throw new Error('CSV is empty');
@@ -252,6 +257,7 @@ function finalizeState(state) {
 }
 
 export async function readStateResults(archive) {
+  let duplicateRows = 0;
   const totalCells = new Set();
   const totalPrecincts = new Map();
   const componentPrecincts = new Map();
@@ -276,7 +282,7 @@ export async function readStateResults(archive) {
     } else {
       addToSetMap(componentPrecincts, scope, precinct);
     }
-  });
+  }, () => { duplicateRows += 1; rowsRead += 1; });
 
   const aggregateTotalPrecincts = new Set();
   for (const [scope, totals] of totalPrecincts) {
@@ -374,7 +380,7 @@ export async function readStateResults(archive) {
       return;
     }
     const votes = Number(row.votes);
-    if (!Number.isSafeInteger(votes)) {
+    if (!row.votes || !Number.isSafeInteger(votes)) {
       throw new Error(`Invalid vote count at CSV line ${lineNumber}: ${row.votes}`);
     }
     if (votes < 0) adjustmentRows += 1;
@@ -392,6 +398,7 @@ export async function readStateResults(archive) {
   return finalizeState({
     ...state,
     rowsRead,
+    duplicateRows,
     supportedRows,
     excludedModeRows,
     excludedStatisticRows,

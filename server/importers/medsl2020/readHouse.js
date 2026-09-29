@@ -1,4 +1,5 @@
 import { createInterface } from 'node:readline';
+import { createHash } from 'node:crypto';
 import { slugifyCandidateName } from '../vest2020/readState.js';
 
 const expectedColumns = [
@@ -92,13 +93,14 @@ function stateRecord(row) {
   };
 }
 
-function contestRecord(state, district, magnitude, special) {
+function contestRecord(state, district, magnitude, special, date) {
   const atLarge = district === 'AL';
   return {
-    sourceIdentifier: `${state.abbreviation}:${district}`,
+    sourceIdentifier: `${state.abbreviation}:${district}${special ? `:special:${date}` : ''}`,
+    electionDate: date,
     district,
     districtLabel: atLarge ? 'At-Large' : `District ${Number(district)}`,
-    name: atLarge ? 'U.S. House — At-Large District' : `U.S. House — District ${Number(district)}`,
+    name: (atLarge ? 'U.S. House — At-Large District' : `U.S. House — District ${Number(district)}`) + (special ? ' — Special Election' : ''),
     magnitude,
     special,
     choices: new Map(),
@@ -137,6 +139,17 @@ function finalizeState(state) {
 }
 
 export async function readHouseResults(archive, onProgress) {
+  // Prefer the published TOTAL cell over its voting-mode components.
+  const totalCells = new Set();
+  const cellKey = row => [row.state_po,row.county_fips,row.jurisdiction_fips,row.precinct,row.district,row.special,row.candidate,row.party_detailed,row.writein].join('\u001f');
+  let firstHeader;
+  for await (const line of createInterface({ input: archive.csvStream(), crlfDelay: Infinity })) {
+    if (!firstHeader) { firstHeader = parseCsvLine(line).map(v => v.replace(/^\uFEFF/, '')); continue; }
+    if (!line) continue;
+    const values = parseCsvLine(line);
+    const row = Object.fromEntries(firstHeader.map((column,index) => [column,values[index]?.trim() || '']));
+    if (row.mode.toUpperCase() === 'TOTAL') totalCells.add(cellKey(row));
+  }
   const reader = createInterface({ input: archive.csvStream(), crlfDelay: Infinity });
   const states = new Map();
   let header = null;
@@ -146,6 +159,9 @@ export async function readHouseResults(archive, onProgress) {
   let suppressedRows = 0;
   let invalidCountyRows = 0;
   let excludedStatisticRows = 0;
+  let duplicateRows = 0;
+  let excludedModeRows = 0;
+  const seenRows = new Set();
 
   for await (const line of reader) {
     lineNumber += 1;
@@ -163,12 +179,19 @@ export async function readHouseResults(archive, onProgress) {
     }
     const row = Object.fromEntries(header.map((column, index) => [column, values[index].trim()]));
     rowsRead += 1;
+    const fingerprint = createHash('sha256').update(JSON.stringify(row)).digest('hex');
+    if (seenRows.has(fingerprint)) { duplicateRows += 1; continue; }
+    seenRows.add(fingerprint);
     const supportedOffice = row.office === 'US HOUSE'
       || row.office === 'DELEGATE TO THE U.S. HOUSE OF REPRESENTATIVES';
     if (!supportedOffice || row.dataverse !== 'HOUSE' || row.year !== '2020' || row.stage !== 'GEN') {
       throw new Error(`Unexpected election scope at CSV line ${lineNumber}`);
     }
     const special = booleanValue(row.special);
+    if ((row.mode.toUpperCase() !== 'TOTAL' && totalCells.has(cellKey(row))) || /^(?:(?:county|state|contest|grand)\s+total|totals?)$/i.test(row.precinct)) {
+      excludedModeRows += 1;
+      continue;
+    }
     if (special) specialRows += 1;
     if (statisticRow(row.candidate)) {
       excludedStatisticRows += 1;
@@ -181,17 +204,20 @@ export async function readHouseResults(archive, onProgress) {
       throw new Error(`Invalid contest magnitude at CSV line ${lineNumber}: ${row.magnitude}`);
     }
     const numericVotes = Number(row.votes);
-    if (!Number.isFinite(numericVotes) || !Number.isInteger(numericVotes)) {
+    if (!row.votes || !Number.isSafeInteger(numericVotes)) {
       throw new Error(`Invalid vote count at CSV line ${lineNumber}: ${row.votes}`);
     }
 
     if (!states.has(row.state_po)) states.set(row.state_po, stateRecord(row));
     const state = states.get(row.state_po);
     state.rowsRead += 1;
-    if (!state.contests.has(district)) {
-      state.contests.set(district, contestRecord(state, district, magnitude, special));
+    const date = row.date || (!special ? '2020-11-03' : '');
+    if (!/^2020-\d{2}-\d{2}$/.test(date) || !Number.isFinite(Date.parse(date)) || new Date(date).toISOString().slice(0,10) !== date) throw new Error(`Invalid 2020 election date: ${row.date}`);
+    const contestKey = `${district}:${special}:${date}`;
+    if (!state.contests.has(contestKey)) {
+      state.contests.set(contestKey, contestRecord(state, district, magnitude, special, date));
     }
-    const contest = state.contests.get(district);
+    const contest = state.contests.get(contestKey);
     if (contest.magnitude !== magnitude) {
       throw new Error(`${state.abbreviation} ${contest.districtLabel} has inconsistent magnitude values`);
     }
@@ -238,6 +264,8 @@ export async function readHouseResults(archive, onProgress) {
 
   return {
     rowsRead,
+    duplicateRows,
+    excludedModeRows,
     specialRows,
     suppressedRows,
     invalidCountyRows,
