@@ -41,7 +41,7 @@ Sources checked for the baseline and schedule:
 - [Florida offices up for election](https://dos.fl.gov/elections/candidates-committees/offices-up-for-election), [Ohio election directives, including 2025-54](https://www.ohiosos.gov/elections/elections-administration/directives).
 - [National Governors Association election schedule](https://www.nga.org/governors/elections/). The governor map covers 36 states; territories are outside this map.
 
-Poll data retains NYT attribution and the supplied CC BY 4.0 license. The UI identifies Signal averages and mappings as transformations. Polls do not establish ballot qualification. The model does not yet include fundamentals, incumbency, correlated polling error, turnout models, or calibrated probabilities. Sparse polling intentionally leaves control unresolved.
+Poll data retains NYT attribution and the supplied CC BY 4.0 license. The UI identifies its polling averages and mappings as transformations. Polls do not establish ballot qualification. The model does not yet include fundamentals, incumbency, correlated polling error, turnout models, or calibrated probabilities. Sparse polling intentionally leaves control unresolved.
 
 ## Verification
 

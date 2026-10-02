@@ -26,7 +26,7 @@ export function parseNyt({header,rows}) {
       if (seen.has(key)) throw new Error(`Duplicate average observation ${key}`);
       seen.set(key, true); return item;
     });
-    return { adapter: 'nyt-averages-v1', source: 'nyt-polls', averages, questions: [], rowsRead: rows.length, warnings: ['Times-published approval averages; separate from individual polls and Signal model estimates.'] };
+    return { adapter: 'nyt-averages-v1', source: 'nyt-polls', averages, questions: [], rowsRead: rows.length, warnings: ['Times-published approval averages; separate from individual polls and site-calculated polling averages.'] };
   }
   if (!has(['poll_id','question_id','pollster_id','pollster','start_date','end_date','population','sample_size','state','methodology'])) return null;
   const approval = has(['politician','yes','no','alternate_answers']);

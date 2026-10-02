@@ -68,8 +68,8 @@ function Icon({ children }) {
 
 function Sidebar({ storage, national, onNational, view, onView }) {
   return <aside className="sidebar">
-    <button className="brand" onClick={() => onView('explore')} aria-label="Signal election hub home">
-      <span className="brand-mark">S</span><span>signal</span>
+    <button className="brand" onClick={() => onView('explore')} aria-label="Electioneer election hub home">
+      <span className="brand-mark">E</span><span>Electioneer</span>
     </button>
     <nav aria-label="Primary navigation">
       <button className={`nav-item ${view === 'explore' ? 'active' : ''}`} onClick={() => onView('explore')}><Icon>⌂</Icon><span>Election map</span></button>

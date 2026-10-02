@@ -25,7 +25,7 @@ app.get('/api/hub/contests/:id/geographies',getHubGeographies);
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'); app.use(express.static(path.join(root,'dist'))); app.get('*splat',(req,res)=>res.sendFile(path.join(root,'dist','index.html')));
 app.use((error,req,res,next)=>res.status(error.status||500).json({error:error.message||'Internal server error'}));
 const port=Number(process.env.PORT||3000);
-const server=app.listen(port,()=>console.log(`Signal API listening on http://localhost:${port}`));
+const server=app.listen(port,()=>console.log(`Electioneer API listening on http://localhost:${port}`));
 let worker;
 let shuttingDown=false;
 function startWorker() {
