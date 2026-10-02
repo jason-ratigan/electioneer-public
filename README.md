@@ -1,6 +1,12 @@
 # Electioneer
 
-Electioneer is an election data explorer with a React/Vite client, Express API, and PostgreSQL/PostGIS database. It supports general, primary, runoff, special, and presidential contests. Source results are stored as immutable batches and snapshots so historical revisions and election-night trends can be reconstructed.
+Electioneer explores U.S. election results with a React/Vite client, Express API, and PostgreSQL/PostGIS database. It preserves source imports and revisions. Popular-vote and geographic results appear after their source files have been imported.
+
+## What this branch includes
+
+- Historical election results, district and county maps, and presidential Electoral College results.
+- Command-line importers for VEST 2020, MEDSL 2020/2024, Census districts, and 2026 candidate sources.
+- The polling explorer, poll library, and authenticated admin imports are on [`feature/presidential-electoral-college-results`](https://github.com/jason-ratigan/electioneer-public/tree/feature/presidential-electoral-college-results).
 
 ## Architecture
 
@@ -15,17 +21,20 @@ The API uses controller → service → repository separation:
 
 ## Run
 
-After installing the dependencies once with `npm install`, start the entire development stack with one command:
+Install Node.js 22 or newer and Docker with Compose. Then install the locked dependencies and start the development stack:
 
 ```bash
+npm ci
 npm run dev
 ```
 
+On Windows PowerShell, use `npm.cmd` in place of `npm` if script execution is restricted. Python 3 and the requirements files are needed for the Python-based collectors and parser tests.
+
 This starts PostgreSQL/PostGIS through Docker Compose, waits for it to become healthy, and then launches both the API and web client. The API applies any pending migrations during startup. The database volume is preserved between runs, so imported election data remains available. Press `Ctrl+C` to stop the application processes; use `npm run db:down` when you also want to stop PostgreSQL.
 
-The web client runs at `http://localhost:4173`; the API runs at `http://localhost:3000`. Production uses `npm run build && npm start`. The default development connection is `postgresql://signal:signal@localhost:15432/signal`; set `DATABASE_URL` for another PostgreSQL instance. The development port avoids colliding with a system PostgreSQL installation and the Windows reserved port range that includes 55432. Set `DATABASE_SSL=true` when the provider requires TLS. The bundled Compose service uses PostgreSQL 17 with PostGIS 3.5.
+The web client runs at `http://localhost:4173`; the API runs at `http://localhost:3000`. Production uses `npm run build && npm start`. The default development connection is `postgresql://signal:signal@localhost:15432/signal`; these are local database identifiers, not the application name. Set `DATABASE_URL` for another PostgreSQL instance. The development port avoids colliding with a system PostgreSQL installation and the Windows reserved port range that includes 55432. Set `DATABASE_SSL=true` when the provider requires TLS. The bundled Compose service uses PostgreSQL 17 with PostGIS 3.5.
 
-New databases start empty. Development fixtures and source imports are explicit operations; application startup never inserts illustrative election data.
+Migrations seed certified presidential Electoral College votes for 2000–2024 and 2028 state allocations. Popular-vote results, geographic boundaries, candidate rosters, and polls require separate source imports. Downloaded source files and local database contents are not included in this repository.
 
 ## Delaware VEST importer
 
@@ -184,28 +193,22 @@ There is deliberately no generic result-write endpoint. Results enter through va
 - `vote_totals` stores votes by snapshot, reporting geography, ballot choice, vote type, and tabulation round. Contest-wide totals use the contest district as their reporting unit so detail rows are never accidentally double-counted.
 - `geographies`, `geography_versions`, and `geography_relationships` support dated PostGIS boundaries, containment, reporting relationships, and crosswalk allocations.
 - `polls`, `poll_questions`, and `poll_responses` are separate from official results.
-- `model_runs` and `model_estimates` hold poll averages, projections, and election-night scenarios without changing source vote totals.
+- `model_runs` and `model_estimates` are schema tables reserved for future model output; this branch does not publish forecasts.
 - `data_sources`, `source_artifacts`, source-ID mapping tables, and `ingestion_runs` preserve lineage and importer audit data.
 
-## Agreed archive policy
+## Data scope and current limits
 
-- General election results begin in 2000.
-- Primary results and polling observations begin in 2014.
-- Historical municipal, county, local-primary, and ballot-measure records are excluded.
-- Historical statewide offices are excluded except governor; federal offices remain in scope.
-- Refresh is user-initiated through `POST /api/refresh`; there is no scheduler.
-- PostgreSQL exposes database size and record counts at `GET /api/storage`.
-- Initial adapters are planned for OpenElections, VEST, state election offices, and optionally AP Elections after credentials are configured. Provider ingestion remains intentionally unimplemented until formats and credentials are supplied.
+- General election results begin in 2000; primary results and polling observations begin in 2014. Historical local races and ballot measures are outside the current scope.
+- VEST and MEDSL result importers, Census boundaries, and candidate-source importers are implemented. OpenElections, state-office feeds, AP Elections, and live election-night ingestion are not.
+- `POST /api/refresh` is a legacy stub that returns `501`; there is no scheduler. `GET /api/storage` reports database size and record counts.
 
-## Remaining inputs needed before production integration
+## Before deployment
 
-1. Licensed polling/results providers and credentials.
-2. The initial states and federal offices to prioritize within the agreed archive scope.
-3. The exact weighting methodology and rules for partisan and AAA pollsters, recency, revisions, and exclusions.
-4. Official-source precedence and correction rules for manual election-night refreshes.
-5. PostgreSQL backup, retention, and deployment-provider preferences.
+This branch has no admin import UI. Its legacy `/api/ingest-runs` and `/api/refresh` routes are not authenticated, so restrict API access before a public deployment. Provide production database credentials, TLS, and backups for PostgreSQL and source artifacts.
 
-The database starts without popular vote, candidate, or polling records. Certified presidential Electoral College results for 2000–2024 and 2028 allocations are seeded from the National Archives.
+## Verification
+
+Run `npm run check`, `npm run test:schema`, `npm run test:electoral`, and `npm run build`. The Python parser tests require the packages in `requirements-importers.txt`.
 
 ## Planning documents
 
