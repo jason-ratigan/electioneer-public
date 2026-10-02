@@ -1,6 +1,6 @@
-# Signal
+# Electioneer
 
-Signal is a full-stack election-data foundation with a React/Vite client, Express API, and PostgreSQL/PostGIS database. It supports general, primary, runoff, special, and presidential contests. Source results are stored as immutable batches and snapshots so historical revisions and election-night trends can be reconstructed.
+Electioneer is an election data explorer with a React/Vite client, Express API, and PostgreSQL/PostGIS database. It supports general, primary, runoff, special, and presidential contests. Source results are stored as immutable batches and snapshots so historical revisions and election-night trends can be reconstructed.
 
 ## Architecture
 

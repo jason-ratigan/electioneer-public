@@ -66,8 +66,8 @@ function Icon({ children }) {
 
 function Sidebar({ storage, national, onNational }) {
   return <aside className="sidebar">
-    <button className="brand" onClick={onNational} aria-label="Signal election hub home">
-      <span className="brand-mark">S</span><span>signal</span>
+    <button className="brand" onClick={onNational} aria-label="Electioneer election hub home">
+      <span className="brand-mark">E</span><span>Electioneer</span>
     </button>
     <nav aria-label="Primary navigation">
       <button className={`nav-item ${national ? 'active' : ''}`} onClick={onNational}><Icon>⌂</Icon><span>Election hub</span></button>
