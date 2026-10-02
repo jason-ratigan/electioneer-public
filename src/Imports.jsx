@@ -1,4 +1,4 @@
-import React,{useEffect,useState} from 'react';
+import React,{useEffect,useRef,useState} from 'react';
 
 async function json(url,options={}) {
   const response=await fetch(url,options);
@@ -13,9 +13,10 @@ async function json(url,options={}) {
   return body.data;
 }
 export function AdminImports({onPublished}) {
-  const [token,setToken]=useState(''),[authenticated,setAuthenticated]=useState(false),[error,setError]=useState(''),[jobs,setJobs]=useState([]),[selected,setSelected]=useState(null),[uploading,setUploading]=useState(false),[checked,setChecked]=useState(false),[sourceUrl,setSourceUrl]=useState(''),[license,setLicense]=useState('');
+  const [token,setToken]=useState(''),[authenticated,setAuthenticated]=useState(false),[error,setError]=useState(''),[jobs,setJobs]=useState([]),[selected,setSelected]=useState(null),[uploading,setUploading]=useState(false),[refreshing,setRefreshing]=useState(false),[activeBatchId,setActiveBatchId]=useState(null),[checked,setChecked]=useState(false),[sourceUrl,setSourceUrl]=useState(''),[license,setLicense]=useState('');
+  const publishedIds=useRef(null);
   const auth={Authorization:`Bearer ${token}`};
-  async function refresh() {const data=await json('/api/admin/imports',{headers:auth});setJobs(data);setSelected(current=>current?data.find(j=>j.id===current.id)||current:null);setError('');}
+  async function refresh() {const data=await json('/api/admin/imports',{headers:auth});setJobs(data);setSelected(current=>current?data.find(j=>j.id===current.id)||current:null);}
   useEffect(()=>{
     if(!authenticated) return;
     let active=true;
@@ -23,7 +24,12 @@ export function AdminImports({onPublished}) {
     update();const timer=setInterval(update,2000);
     return()=>{active=false;clearInterval(timer);};
   },[authenticated,token]);
-  useEffect(()=>{setChecked(false);if(selected?.status==='completed') onPublished?.();},[selected?.id,selected?.status]);
+  useEffect(()=>{setChecked(false);},[selected?.id,selected?.status]);
+  useEffect(()=>{
+    const complete=new Set(jobs.filter(job=>job.status==='completed').map(job=>job.id));
+    if(publishedIds.current && [...complete].some(id=>!publishedIds.current.has(id))) onPublished?.();
+    publishedIds.current=complete;
+  },[jobs]);
   async function login(e) {e.preventDefault();try{await json('/api/admin/session',{headers:auth});setAuthenticated(true);setError('');}catch(e){setError(e.message);}}
   async function upload(files) {
     if(uploading)return;setUploading(true);setError('');
@@ -37,17 +43,45 @@ export function AdminImports({onPublished}) {
       await refresh();
     }catch(e){setError(e.message);}finally{setUploading(false);}
   }
+  async function updateNyt() {
+    if(refreshing)return;setRefreshing(true);setError('');
+    try {
+      const batch=await json('/api/admin/nyt-refresh',{method:'POST',headers:auth});
+      setActiveBatchId(batch.batchId);
+      setSelected(batch.jobs[0]||null);
+      await refresh();
+    }catch(e){setError(e.message);}finally{setRefreshing(false);}
+  }
   async function action(kind) {
     try {setError('');const job=await json(`/api/admin/imports/${selected.id}/${kind}`,{method:'POST',headers:{...auth,'Content-Type':'application/json'},body:JSON.stringify({confirmation:selected.confirmation})});setSelected(job);await refresh();}
     catch(e){setError(e.message);}
   }
   const p=selected?.preview;
+  const batchId=activeBatchId||jobs.find(job=>job.refresh_batch_id)?.refresh_batch_id;
+  const batchJobs=jobs.filter(job=>job.refresh_batch_id===batchId);
+  const batchBusy=batchJobs.some(job=>['queued','validating','committing'].includes(job.status));
+  const published=batchJobs.filter(job=>job.status==='completed').length;
+  const failed=batchJobs.filter(job=>job.status==='failed').length;
   return <section className="import-page">
     <span className="section-label">ADMINISTRATION</span><h1>Import source data</h1>
-    <p>Upload a source download, review its mapping and changes, then confirm publication.</p>
+    <p>Update NYT polling from the six published downloads, or upload a source file for review.</p>
     {error&&<p role="alert" className="import-error">{error}</p>}
     {!authenticated?<form className="import-panel" onSubmit={login}><h2>Administrator access</h2><label>Admin token<input type="password" autoComplete="off" value={token} onChange={e=>setToken(e.target.value)} required/></label><p>Use the secret configured as ADMIN_IMPORT_TOKEN on your server. It stays in memory for this page session.</p><button className="primary-button">Unlock imports</button></form>:<>
-      <button className="back-button" onClick={()=>{setAuthenticated(false);setToken('');setJobs([]);setSelected(null);}}>Lock admin</button>
+      <button className="back-button" onClick={()=>{setAuthenticated(false);setToken('');setJobs([]);setSelected(null);setActiveBatchId(null);publishedIds.current=null;}}>Lock admin</button>
+      <section className="import-panel nyt-refresh">
+        <h2>NYT polling update</h2>
+        <p>Download and publish presidential approval polls and averages, 2028 presidential polls, and 2026 Senate, House, and governor polls. Other offices are excluded. Each file is checked before publication; unchanged downloads are recorded as no-ops.</p>
+        <button className="primary-button" disabled={refreshing||batchBusy} onClick={updateNyt}>{refreshing?'Starting update…':batchBusy?'Update in progress':'Update NYT polls'}</button>
+        {!!batchJobs.length&&<div className="nyt-refresh-status" aria-live="polite">
+          <p><strong>{published} of {batchJobs.length} published</strong>{failed?` · ${failed} failed`:''}{batchBusy?' · processing':''}</p>
+          <ul>{batchJobs.map(job=><li key={job.id}>
+            <button type="button" onClick={()=>setSelected(job)}>{job.filename}</button>
+            <span>{job.status==='completed'&&job.report?.alreadyImported?'unchanged':`${job.status} · ${job.phase}`}</span>
+            {job.status==='failed'&&<small>{job.message}</small>}
+          </li>)}</ul>
+          {!!failed&&<p>Select a failed file to see its error and retry it.</p>}
+        </div>}
+      </section>
       <div className="import-panel">
         <div className="import-fields"><label>Original source URL (optional)<input type="url" placeholder="https://…" value={sourceUrl} onChange={e=>setSourceUrl(e.target.value)}/></label><label>Dataset license override (optional)<input placeholder="Use only if specified by this download" value={license} onChange={e=>setLicense(e.target.value)}/></label></div>
         <label className={`upload-zone ${uploading?'busy':''}`} onDragOver={e=>e.preventDefault()} onDrop={e=>{e.preventDefault();void upload([...e.dataTransfer.files]);}}>
@@ -61,7 +95,7 @@ export function AdminImports({onPublished}) {
         <section className="import-panel import-detail" aria-live="polite">
           {!selected?<p>Select an import to review its preview and audit report.</p>:<><h2>{selected.filename}</h2><p><strong>{selected.status}</strong> · {selected.message}</p>
             {['queued','validating','committing'].includes(selected.status)&&<progress aria-label="Import progress"/>}
-            <details><summary>Artifact and audit identity</summary><p>SHA-256: <code>{selected.sha256}</code></p><p>{Number(selected.byte_size).toLocaleString()} bytes · import {selected.id}</p>{selected.ingestion_run_id&&<p>Run {selected.ingestion_run_id}</p>}</details>
+            <details><summary>Artifact and audit identity</summary><p>SHA-256: <code>{selected.sha256||'Awaiting download'}</code></p><p>{selected.byte_size==null?'Awaiting download':`${Number(selected.byte_size).toLocaleString()} bytes`} · import {selected.id}</p>{selected.source_url&&<p><a href={selected.source_url} target="_blank" rel="noreferrer">Original download</a></p>}{selected.ingestion_run_id&&<p>Run {selected.ingestion_run_id}</p>}</details>
             {p&&<><h3>Proposed mapping</h3><dl className="preview-grid"><dt>Source / adapter</dt><dd>{p.source} / {p.adapter}</dd><dt>Cycles</dt><dd>{p.cycles.join(', ')||'Approval time series'}</dd><dt>Offices</dt><dd>{p.offices.join(', ')||'Presidential approval'}</dd><dt>Stages</dt><dd>{p.stages.join(', ')||'Not an election contest'}</dd><dt>Geography</dt><dd>{p.geographies.join(', ')||'National'}</dd><dt>Source rows</dt><dd>{p.rows.toLocaleString()}</dd><dt>Surveys / questions / races</dt><dd>{p.surveys} / {p.questions} / {p.contests}</dd><dt>Published averages</dt><dd>{p.averages}</dd><dt>Skipped rows</dt><dd>{p.skippedRows}</dd><dt>License</dt><dd>{p.license}</dd></dl>
               {p.sourceUrl&&<p><a href={p.sourceUrl} target="_blank" rel="noreferrer">Source documentation</a></p>}
               <h3>Changes after validation</h3><div className="preview-counts">{Object.entries(p.newRecords).map(([name,count])=><span key={name}><b>{count.toLocaleString()}</b> new {name}</span>)}</div>

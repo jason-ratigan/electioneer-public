@@ -9,6 +9,7 @@ import { privatePath,hashFile,savePlan,readPlan } from './storage.js';
 import { parseUpload } from './adapters.js';
 import { sha,nytUrl } from './nyt.js';
 import { vestStates } from '../vest2020/states.js';
+import { downloadNytRefresh } from './nytRefresh.js';
 
 const sourceUrls={ 'nyt-polls':nytUrl,medsl:'https://github.com/MEDSL/2024-elections-official',vest:'https://doi.org/10.7910/DVN/K7760H' };
 const counts=async client=>(await client.query(`SELECT (SELECT count(*) FROM polls)::int AS surveys,(SELECT count(*) FROM poll_questions)::int AS questions,(SELECT count(*) FROM contests)::int AS contests,(SELECT count(*) FROM candidates)::int AS candidates,(SELECT count(*) FROM result_snapshots)::int AS snapshots`)).rows[0];
@@ -106,6 +107,12 @@ export async function processJob(job) {
   const progress=async message=>{await db.query('UPDATE admin_imports SET message=$2,updated_at=now() WHERE id=$1',[job.id,message]);};
   let client,runId;
   try {
+    if(job.phase==='download') {
+      await progress('Downloading from The New York Times');
+      const upload=await downloadNytRefresh(job);
+      await db.query(`UPDATE admin_imports SET sha256=$2,byte_size=$3,phase='preview',status='queued',progress=0,message='Download complete; validation queued',updated_at=now() WHERE id=$1`,[job.id,upload.sha256,upload.byteSize]);
+      return;
+    }
     if(await hashFile(privatePath(job.id))!==job.sha256) throw new Error('Stored upload checksum changed; upload the source again.');
     if(job.phase==='preview') {
       const plan=await parseUpload(job,progress);
@@ -118,7 +125,13 @@ export async function processJob(job) {
       await client.query('ROLLBACK');client.release();client=null;
       const preview={...describe(plan),changes:report,newRecords:Object.fromEntries(Object.keys(before).map(k=>[k,after[k]-before[k]])),planChecksum:await hashFile(privatePath(job.id,'plan')),sourceUrl:job.source_url||(plan.adapter==='medsl-house-2020-v1'?'https://github.com/MEDSL/2020-elections-official':sourceUrls[plan.source]),license:job.license||(plan.source==='medsl'?'Dataset terms not supplied':'CC BY 4.0')};
       const confirmation=sha({checksum:job.sha256,preview});
-      await db.query(`UPDATE admin_imports SET status='ready',progress=100,preview=$2,confirmation=$3,message='Preview validated in a rolled-back transaction. Review and explicitly confirm to publish.',updated_at=now() WHERE id=$1`,[job.id,JSON.stringify(preview),confirmation]);
+      await db.query(`UPDATE admin_imports SET status=CASE WHEN auto_publish THEN 'queued' ELSE 'ready' END,
+        phase=CASE WHEN auto_publish THEN 'commit' ELSE 'preview' END,
+        progress=CASE WHEN auto_publish THEN 0 ELSE 100 END,
+        preview=$2,confirmation=$3,
+        confirmed_at=CASE WHEN auto_publish THEN now() ELSE confirmed_at END,
+        message=CASE WHEN auto_publish THEN 'Validated NYT download; publication queued' ELSE 'Preview validated in a rolled-back transaction. Review and explicitly confirm to publish.' END,
+        updated_at=now() WHERE id=$1`,[job.id,JSON.stringify(preview),confirmation]);
     } else {
       if(!job.confirmed_at || await hashFile(privatePath(job.id,'plan'))!==job.preview?.planChecksum) throw new Error('The staged plan changed or was not confirmed. Upload again.');
       const plan=await readPlan(job.id);

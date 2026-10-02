@@ -12,6 +12,10 @@ Without a sufficiently long configured token, all admin endpoints return 503 and
 
 ## Review and publish
 
+For the six stable NYT CSVs, select **Update NYT polls** after unlocking the admin page. One request queues presidential approval polls and published averages, 2028 presidential polls, and 2026 Senate, House and governor polls. The other-offices download is intentionally excluded. The worker downloads each file from the fixed NYT URL, checks it through the same rolled-back validation as a manual upload, and publishes it automatically because selecting the update button explicitly authorizes this fixed-source refresh. The six file statuses and failures appear together above import history; select a file to inspect its mapping and audit, or retry a failed file. Repeated clicks while a refresh is in progress return the active batch. Identical source bytes produce an audited no-op. A failed file does not stop the other five; previously published observations remain available. The refresh does not delete polls absent from a newer download.
+
+The server must be able to reach `www.nytimes.com` over HTTPS. Redirects are accepted only to `www.nytimes.com` or `static01.nyt.com`; a source or schema change fails visibly and requires review. Each download is limited to the configured import size and a two-minute request timeout. The browser never supplies a download URL. The source URL and CC BY 4.0 attribution are retained on each artifact. The refresh runs in the background; leave the API and import worker running until all six jobs finish.
+
 1. Drop one or more CSVs/ZIPs onto the upload target, or choose files. Each selected file gets an independent preview. A ZIP can group compatible CSVs into a single atomic import. Different sources or MEDSL vintages must be uploaded separately.
 2. Optionally provide the original download URL and a dataset-specific license override **before** uploading. Default source documentation is shown in the preview. Formats identify a proposed source, not proof that a third-party file really came from that publisher.
 3. The background worker validates content and executes the actual persistence path in a transaction which it rolls back. Review scope, source row/question/contest counts, proposed new records, unchanged/revised records, skipped rows/files, mapping details and warnings.
@@ -69,6 +73,7 @@ Authenticated API:
 
 - `GET /api/admin/session`
 - `POST /api/admin/imports?filename=…&sourceUrl=…&license=…`
+- `POST /api/admin/nyt-refresh` (queue or return the active six-file NYT refresh)
 - `GET /api/admin/imports` / `GET /api/admin/imports/:id`
 - `POST /api/admin/imports/:id/commit` with JSON `{ "confirmation": "<preview token>" }`
 - `POST /api/admin/imports/:id/retry`

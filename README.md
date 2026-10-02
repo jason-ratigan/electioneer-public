@@ -4,9 +4,9 @@ Electioneer explores U.S. election results and polling with a React/Vite client,
 
 ## What this branch includes
 
-- A 2026 polling map, poll library, and published presidential approval averages.
+- A 2026 polling map with dated current-holder assumptions and browser-saved winner picks, a poll library, and published presidential approval averages.
 - Historical results, district and county maps, and presidential Electoral College results.
-- Reviewed CSV/ZIP imports through an authenticated admin page, plus source-specific command-line importers.
+- Reviewed CSV/ZIP imports and a manual NYT polling refresh through an authenticated admin page, plus source-specific command-line importers.
 
 ## Architecture
 
@@ -38,13 +38,15 @@ Migrations seed certified presidential Electoral College votes for 2000–2024 a
 
 ## 2026 polling explorer
 
-The home page opens the Senate, governor, and House polling map. Move the date to inspect earlier polls, compare candidate matchups, and open source questions. Control scenarios are temporary; unpolled races remain unresolved. National approval and generic-ballot polls remain separate from state races.
+The home page opens the Senate, governor, and House polling map. Move the date to inspect earlier polls, compare candidate matchups, and open source questions. The 2026 control scenario starts with a dated current-holder assumption for unpolled races; you can turn it off or pick a winner. Picks stay in this browser and never change source data. National approval and generic-ballot polls remain separate from state races.
 
 The polling average is a descriptive calculation, not a probability or forecast. Historical results, the poll library, and admin imports are available from the sidebar. See [polling outlook methodology and usage](docs/polling-outlook.md) for sources, exclusions, and limits.
 
 ## Admin CSV and ZIP imports
 
-Open **Admin imports** (`/#admin`) to upload NYT polling CSVs, published approval averages, MEDSL 2024 state precinct downloads, MEDSL 2020 House files, or documented VEST 2020 archives. Set a random `ADMIN_IMPORT_TOKEN` of at least 32 characters in the API process environment first; admin endpoints are disabled without it. The token is entered in the admin page and is never bundled into the client.
+Open **Admin imports** (`/#admin`) to refresh the six supported NYT polling downloads or upload NYT polling CSVs, published approval averages, MEDSL 2024 state precinct downloads, MEDSL 2020 House files, or documented VEST 2020 archives. Set a random `ADMIN_IMPORT_TOKEN` of at least 32 characters in the API process environment first; admin endpoints are disabled without it. The token is entered in the admin page and is never bundled into the client.
+
+The **Update NYT polls** button downloads six fixed Times CSVs after administrator authentication and publishes each validated file automatically; other uploads still require preview and explicit confirmation. The button does not schedule future refreshes.
 
 Uploads are privately staged and validated asynchronously. Review the source, actual row scope, proposed changes, unresolved mappings and warnings, then explicitly confirm publication. Commit is transactional, retries are idempotent, corrections retain previous observations, and import history includes checksums and audit reports. The **Polls** view displays individual questions with sample/population, field dates, responses and NYT attribution; Times-published approval averages appear separately from raw polls and model estimates.
 
@@ -199,7 +201,7 @@ The older Ballotpedia live collector remains in the repository for reproducibili
 - `GET /api/ingest-runs` (administrator authentication required)
 - `POST /api/refresh` (administrator authentication required; legacy route returns `501`)
 - `GET /api/polls`, `GET /api/polls/facets`, `GET /api/poll-averages`
-- `GET /api/admin/imports`, `POST /api/admin/imports`, `GET /api/admin/imports/:id`, `POST /api/admin/imports/:id/commit`, `POST /api/admin/imports/:id/retry` (administrator authentication required)
+- `GET /api/admin/imports`, `POST /api/admin/imports`, `GET /api/admin/imports/:id`, `POST /api/admin/imports/:id/commit`, `POST /api/admin/imports/:id/retry`, `POST /api/admin/nyt-refresh` (administrator authentication required)
 
 There is deliberately no generic result-write endpoint. Results enter through validated, source-specific importers that create provenance records, immutable result batches, snapshots, reporting status, and vote totals in one transaction. Presidential Electoral College data has its own state allocations and append-only future update path; see the [Electoral College guide](docs/electoral-college.md).
 
@@ -222,7 +224,7 @@ There is deliberately no generic result-write endpoint. Results enter through va
 
 - General election results begin in 2000; primary results and polling observations begin in 2014. Historical local races and ballot measures are outside the current scope.
 - VEST and MEDSL result importers, Census boundaries, candidate-source importers, and NYT poll imports are implemented. OpenElections, state-office feeds, and AP Elections are not.
-- Administrator uploads require preview and confirmation; no scheduler or general live-results feed is configured. `GET /api/storage` reports database size and record counts.
+- Administrator uploads and the six-file NYT refresh are manual; no scheduler or general live-results feed is configured. `GET /api/storage` reports database size and record counts.
 - The polling outlook is descriptive. It does not estimate win probabilities, calibrated uncertainty, or election-night outcomes.
 
 ## Before deployment

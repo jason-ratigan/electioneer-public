@@ -2,7 +2,8 @@
 export const pollColors = {
   D: '#3073c9', DMedium: '#79a7de', DLight: '#bed5f0',
   R: '#c94e59', RMedium: '#df9299', RLight: '#f0c5c9',
-  competitive: '#a08cbc', other: '#68778b', unknown: '#dce3eb', off: '#f0f3f7'
+  competitive: '#a08cbc', other: '#68778b', unknown: '#dce3eb', off: '#f0f3f7',
+  baselineD: '#dbe9f8', baselineR: '#f8dfe2'
 };
 export const mapLegend = [
   ['D','D 10+'],['DMedium','D 5–10'],['DLight','D 3–5'],

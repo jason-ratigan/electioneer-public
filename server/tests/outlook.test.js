@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {availableOn,visiblePolls,pollingLead,category,controlSummary,mappedSeat} from '../outlook/model.js';
+import {officeholderBaseline} from '../outlook/baseline.js';
 const poll=(id,changes={})=>({id,survey_id:id,pollster_id:id,field_end:'2026-09-01',stage:'general',kind:'election',office:'us_house',state:'PA',district:'1',population:'likely_voters',responses:[{label:'Democrat',sourceId:'d',party:'DEM',share:48},{label:'Republican',sourceId:'r',party:'REP',share:44},{label:'Undecided',party:'NONE',share:8}],...changes});
 test('mapping distinguishes national opinion, states, numbered districts, and at-large seats',()=>{
   const districts=[{abbreviation:'PA-01'},{abbreviation:'AK-AL'}];
@@ -48,12 +49,44 @@ test('a poll becomes usable on its creation date and ages out after sixty days',
 });
 test('control totals preserve unknown seats, exclude DC and deduplicate ambiguous seats',()=>{
   const races=[{seatKey:'PA-01',state:'PA',lead:{margin:4}},{seatKey:'PA-02',state:'PA',lead:{margin:-4}},{seatKey:'DC-AL',state:'DC',lead:{margin:90}}];
-  assert.deepEqual(controlSummary(races),{D:1,R:1,competitive:0,unknown:433,total:435,majority:218});
+  assert.deepEqual(controlSummary(races),{D:1,R:1,other:0,competitive:0,unknown:433,total:435,majority:218,sources:{picked:0,polled:2,incumbent:0}});
   assert.equal(controlSummary([...races,races[0]]).D,0);
   const shifted=controlSummary(races,{swing:2,overrides:{'PA-01':'R'}});
   assert.equal(shifted.D,0);assert.equal(shifted.R,1);assert.equal(shifted.competitive,1);
   const senate=controlSummary([],{total:100,holdD:34,holdR:31});
   assert.equal(senate.unknown,35);assert.equal(senate.majority,51);
+});
+test('2026 current-holder snapshot reconciles all voting seats and holdovers',()=>{
+  const house=officeholderBaseline('us_house',2026);
+  assert.deepEqual(house.current,{D:214,R:218,I:1,vacant:2});
+  assert.equal(Object.keys(house.seats).length,433);
+  assert.equal(house.seats['FL-20'],undefined);
+  assert.equal(house.seats['TX-23'],undefined);
+  const senate=officeholderBaseline('us_senate',2026);
+  assert.deepEqual(senate.current,{D:45,R:53,I:2,vacant:0});
+  assert.deepEqual(senate.holdovers,{D:34,R:31,I:0});
+  assert.equal(Object.keys(senate.seats).length,35);
+  assert.equal(senate.holdoverSeats.CA.length,2);
+  const governors=officeholderBaseline('governor',2026);
+  assert.deepEqual(governors.current,{D:24,R:26,I:0,vacant:0});
+  assert.deepEqual(governors.holdovers,{D:6,R:8,I:0});
+  assert.equal(Object.keys(governors.seats).length,36);
+  assert.equal(Object.keys(governors.holdoverSeats).length,14);
+  assert.equal(officeholderBaseline('governor',2028),null);
+});
+test('a pick outranks polling, while polling outranks the current-holder assumption',()=>{
+  const races=[
+    {seatKey:'A-01',state:'A',lead:{margin:null},incumbent:{party:'D'}},
+    {seatKey:'A-02',state:'A',lead:{margin:-4},incumbent:{party:'D'}},
+    {seatKey:'A-03',state:'A',lead:{margin:null},incumbent:{party:'I'}}
+  ];
+  const defaultResult=controlSummary(races,{total:3});
+  assert.deepEqual([defaultResult.D,defaultResult.R,defaultResult.other],[1,1,1]);
+  assert.deepEqual(defaultResult.sources,{picked:0,polled:1,incumbent:2});
+  const picked=controlSummary(races,{total:3,overrides:{'A-02':{party:'D',name:'Chosen candidate'}}});
+  assert.equal(picked.D,2);assert.equal(picked.sources.picked,1);
+  const noBaseline=controlSummary(races,{total:3,useBaseline:false});
+  assert.equal(noBaseline.unknown,2);
 });
 test('category boundaries tolerate floating point arithmetic',()=>{
   assert.equal(category(2.999999999999997),'D');

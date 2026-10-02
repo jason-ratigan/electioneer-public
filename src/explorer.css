@@ -39,3 +39,13 @@
 @media(min-width:1550px){.explorer-grid{grid-template-columns:minmax(0,1.3fr) minmax(490px,1fr)}}
 @media(max-width:1150px){.explorer-grid{grid-template-columns:minmax(0,1fr)}.race-browser .poll-table-scroll{max-height:440px}}
 @media(max-width:650px){.race-browser{padding:12px}.race-browser-heading h2{font-size:18px}.poll-table th,.poll-table td{padding:9px 4px}.table-response strong{font-size:12px}.poll-table thead th{font-size:9px;padding:8px 4px}.poll-table thead th:first-child{width:32%}.poll-table thead th:nth-child(4){width:24%}.table-spread{font-size:9px}.browser-average strong{font-size:18px}.poll-table-footer{gap:8px}}
+.current-balance{background:#f6f8fb;border:1px solid #e4eaf1;border-radius:7px;padding:8px 11px;margin:14px 0 0!important}
+.control-card .baseline-toggle{display:flex;align-items:center;gap:9px;margin:13px 0 16px;font-size:12px;color:#354a65}
+.baseline-toggle input{accent-color:#345e9e}
+.holder-line{background:#f4f7fb;border-left:3px solid #7e99bd;padding:8px 10px}
+.winner-picker{border-top:1px solid var(--line);padding-top:13px;margin-top:14px}
+.winner-picker label{display:flex;align-items:flex-start;flex-direction:column;gap:7px;font-weight:700;color:#30425b}
+.winner-picker label+label{margin-top:10px}
+.winner-picker select{max-width:100%;width:100%}
+.winner-picker input{width:100%}
+.winner-picker small{display:block;color:#718099;font-size:10px;line-height:1.5;margin-top:9px}

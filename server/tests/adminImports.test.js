@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test,{after} from 'node:test';
 import { randomUUID } from 'node:crypto';
-import { readFile,readdir } from 'node:fs/promises';
+import { readFile,readdir,rm } from 'node:fs/promises';
 import { Readable } from 'node:stream';
 import express from 'express';
 import { db,closeDatabase } from '../db.js';
@@ -9,7 +9,8 @@ import { parseCsv } from '../importers/admin/csv.js';
 import { parseNyt,sha } from '../importers/admin/nyt.js';
 import { storePolls } from '../importers/admin/polls.js';
 import { executePlan } from '../importers/admin/workflow.js';
-import { validateZipEntry } from '../importers/admin/storage.js';
+import { validateZipEntry,privatePath } from '../importers/admin/storage.js';
+import { downloadNytRefresh,nytRefreshSources } from '../importers/admin/nytRefresh.js';
 import { adminRouter } from '../importers/admin/routes.js';
 import { readStateResults } from '../importers/medsl2024/readState.js';
 import { openStateArchive } from '../importers/medsl2024/archive.js';
@@ -41,13 +42,38 @@ test('ZIP rejects traversal, drive paths, encrypted entries, symlinks and bombs'
   assert.throws(()=>validateZipEntry({...entry,externalFileAttributes:0xa0000000}),/symlinks/);
   assert.throws(()=>validateZipEntry({...entry,uncompressedSize:1e9}),/limits/);
 });
+test('NYT refresh uses only the six fixed downloads and stores response bytes',async()=>{
+  assert.deepEqual(nytRefreshSources.map(source=>new URL(source.url).pathname),[
+    '/newsgraphics/polls/approval/president.csv',
+    '/newsgraphics/polls/approval/president-averages.csv',
+    '/newsgraphics/polls/president.csv',
+    '/newsgraphics/polls/senate.csv',
+    '/newsgraphics/polls/house.csv',
+    '/newsgraphics/polls/governor.csv'
+  ]);
+  assert.ok(nytRefreshSources.every(source=>new URL(source.url).hostname==='www.nytimes.com'));
+  const source=nytRefreshSources[0],id=randomUUID();
+  const job={id,filename:source.filename,source_url:source.url,auto_publish:true,refresh_batch_id:randomUUID()};
+  try {
+    const seen=[];
+    const upload=await downloadNytRefresh(job,{fetchImpl:async(url,options)=>{
+      seen.push(url);assert.equal(options.redirect,'manual');
+      return new Response('topic,date,answer,pct\n2025 Approval - Trump,2025-01-20,Approve,47\n',{status:200,headers:{'Content-Type':'text/csv'}});
+    }});
+    assert.deepEqual(seen,[source.url]);
+    assert.ok(upload.byteSize>0);assert.match(upload.sha256,/^[0-9a-f]{64}$/);
+    assert.match(await readFile(privatePath(id),'utf8'),/^topic,date,answer,pct/);
+    await assert.rejects(downloadNytRefresh({...job,source_url:'https://example.com/polls.csv'},{fetchImpl:()=>{throw new Error('Must not fetch');}}),/Unrecognized/);
+    await assert.rejects(downloadNytRefresh(job,{fetchImpl:async()=>new Response(null,{status:302,headers:{Location:'http://127.0.0.1/private'}})}),/outside approved NYT hosts/);
+  }finally{await rm(privatePath(id,'upload'),{force:true});await rm(privatePath(id),{recursive:true,force:true});}
+});
 test('every admin route requires authentication before inspecting uploads or the DB',async()=>{
   const old=process.env.ADMIN_IMPORT_TOKEN;process.env.ADMIN_IMPORT_TOKEN='test-admin-secret-which-is-at-least-32-characters';
   const app=express();app.use(express.json());app.use('/api/admin',adminRouter);
   const server=await new Promise(resolve=>{const s=app.listen(0,'127.0.0.1',()=>resolve(s));});
   const base=`http://127.0.0.1:${server.address().port}`;
   try {
-    for(const [method,path] of [['GET','/imports'],['GET','/imports/'+randomUUID()],['POST','/imports'],['POST',`/imports/${randomUUID()}/commit`],['POST',`/imports/${randomUUID()}/retry`]]) {
+    for(const [method,path] of [['GET','/imports'],['GET','/imports/'+randomUUID()],['POST','/imports'],['POST','/nyt-refresh'],['POST',`/imports/${randomUUID()}/commit`],['POST',`/imports/${randomUUID()}/retry`]]) {
       assert.equal((await fetch(base+'/api/admin'+path,{method})).status,401);
     }
     assert.equal((await fetch(base+'/api/admin/session',{headers:{Authorization:`Bearer ${process.env.ADMIN_IMPORT_TOKEN}`}})).status,200);

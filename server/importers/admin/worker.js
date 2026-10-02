@@ -10,7 +10,7 @@ await db.query(`UPDATE admin_imports SET status='queued',message='Resuming inter
 let stopping=false;
 process.on('SIGTERM',()=>{stopping=true;});process.on('SIGINT',()=>{stopping=true;});
 while(!stopping) {
-  const job=(await db.query(`UPDATE admin_imports SET status=CASE WHEN phase='preview' THEN 'validating' ELSE 'committing' END,progress=5,updated_at=now() WHERE id=(SELECT id FROM admin_imports WHERE status='queued' ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED) RETURNING *`)).rows[0];
+  const job=(await db.query(`UPDATE admin_imports SET status=CASE WHEN phase IN ('preview','download') THEN 'validating' ELSE 'committing' END,progress=5,updated_at=now() WHERE id=(SELECT id FROM admin_imports WHERE status='queued' ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED) RETURNING *`)).rows[0];
   if(job) await processJob(job);
   else await new Promise(resolve=>setTimeout(resolve,1000));
 }

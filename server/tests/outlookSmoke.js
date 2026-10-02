@@ -5,6 +5,9 @@ const base=process.env.TEST_API_URL||'http://127.0.0.1:3000';
 async function get(url){const r=await fetch(base+url,{signal:AbortSignal.timeout(30000)});assert.equal(r.status,200);return (await r.json()).data;}
 for(const office of ['us_senate','governor','us_house']) {
   const data=await get(`/api/hub/outlook?office=${office}&cycle=2026`);
+  assert.equal(data.baseline.total,office==='us_house'?435:office==='us_senate'?100:50);
+  assert.equal(data.baseline.asOf,'2026-09-29');
+  assert.ok(Array.isArray(data.candidates));
   const rows=data.polls.filter(q=>q.kind==='election'&&q.office===office&&q.stage==='general');
   assert.ok(rows.length>0,'Import the supplied polls before running this integration check');
   assert.ok(rows.every(q=>mappedSeat(q,data.districts)),`${office}: unresolved general-election geography`);

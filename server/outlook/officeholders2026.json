@@ -1,0 +1,2550 @@
+{
+  "asOf": "2026-09-29",
+  "sources": {
+    "house": "https://clerk.house.gov/Members/ViewMemberList",
+    "senate": [
+      "https://www.senate.gov/senators/Class_I.htm",
+      "https://www.senate.gov/senators/Class_II.htm",
+      "https://www.senate.gov/senators/Class_III.htm"
+    ],
+    "governors": "https://www.nga.org/wp-content/uploads/2024/12/Governors-Roster.pdf"
+  },
+  "house": {
+    "AK-AL": {
+      "party": "R",
+      "name": "Begich, Nicholas J."
+    },
+    "AL-01": {
+      "party": "R",
+      "name": "Moore, Barry"
+    },
+    "AL-02": {
+      "party": "D",
+      "name": "Figures, Shomari"
+    },
+    "AL-03": {
+      "party": "R",
+      "name": "Rogers, Mike"
+    },
+    "AL-04": {
+      "party": "R",
+      "name": "Aderholt, Robert B."
+    },
+    "AL-05": {
+      "party": "R",
+      "name": "Strong, Dale W."
+    },
+    "AL-06": {
+      "party": "R",
+      "name": "Palmer, Gary J."
+    },
+    "AL-07": {
+      "party": "D",
+      "name": "Sewell, Terri A."
+    },
+    "AR-01": {
+      "party": "R",
+      "name": "Crawford, Eric A. \"Rick\""
+    },
+    "AR-02": {
+      "party": "R",
+      "name": "Hill, J. French"
+    },
+    "AR-03": {
+      "party": "R",
+      "name": "Womack, Steve"
+    },
+    "AR-04": {
+      "party": "R",
+      "name": "Westerman, Bruce"
+    },
+    "AZ-01": {
+      "party": "R",
+      "name": "Schweikert, David"
+    },
+    "AZ-02": {
+      "party": "R",
+      "name": "Crane, Elijah"
+    },
+    "AZ-03": {
+      "party": "D",
+      "name": "Ansari, Yassamin"
+    },
+    "AZ-04": {
+      "party": "D",
+      "name": "Stanton, Greg"
+    },
+    "AZ-05": {
+      "party": "R",
+      "name": "Biggs, Andy"
+    },
+    "AZ-06": {
+      "party": "R",
+      "name": "Ciscomani, Juan"
+    },
+    "AZ-07": {
+      "party": "D",
+      "name": "Grijalva, Adelita S."
+    },
+    "AZ-08": {
+      "party": "R",
+      "name": "Hamadeh, Abraham J."
+    },
+    "AZ-09": {
+      "party": "R",
+      "name": "Gosar, Paul A."
+    },
+    "CA-01": {
+      "party": "R",
+      "name": "Gallagher, James"
+    },
+    "CA-02": {
+      "party": "D",
+      "name": "Huffman, Jared"
+    },
+    "CA-03": {
+      "party": "I",
+      "name": "Kiley, Kevin"
+    },
+    "CA-04": {
+      "party": "D",
+      "name": "Thompson, Mike"
+    },
+    "CA-05": {
+      "party": "R",
+      "name": "McClintock, Tom"
+    },
+    "CA-06": {
+      "party": "D",
+      "name": "Bera, Ami"
+    },
+    "CA-07": {
+      "party": "D",
+      "name": "Matsui, Doris O."
+    },
+    "CA-08": {
+      "party": "D",
+      "name": "Garamendi, John"
+    },
+    "CA-09": {
+      "party": "D",
+      "name": "Harder, Josh"
+    },
+    "CA-10": {
+      "party": "D",
+      "name": "DeSaulnier, Mark"
+    },
+    "CA-11": {
+      "party": "D",
+      "name": "Pelosi, Nancy"
+    },
+    "CA-12": {
+      "party": "D",
+      "name": "Simon, Lateefah"
+    },
+    "CA-13": {
+      "party": "D",
+      "name": "Gray, Adam"
+    },
+    "CA-14": {
+      "party": "D",
+      "name": "Wahab, Aisha"
+    },
+    "CA-15": {
+      "party": "D",
+      "name": "Mullin, Kevin"
+    },
+    "CA-16": {
+      "party": "D",
+      "name": "Liccardo, Sam T."
+    },
+    "CA-17": {
+      "party": "D",
+      "name": "Khanna, Ro"
+    },
+    "CA-18": {
+      "party": "D",
+      "name": "Lofgren, Zoe"
+    },
+    "CA-19": {
+      "party": "D",
+      "name": "Panetta, Jimmy"
+    },
+    "CA-20": {
+      "party": "R",
+      "name": "Fong, Vince"
+    },
+    "CA-21": {
+      "party": "D",
+      "name": "Costa, Jim"
+    },
+    "CA-22": {
+      "party": "R",
+      "name": "Valadao, David G."
+    },
+    "CA-23": {
+      "party": "R",
+      "name": "Obernolte, Jay"
+    },
+    "CA-24": {
+      "party": "D",
+      "name": "Carbajal, Salud O."
+    },
+    "CA-25": {
+      "party": "D",
+      "name": "Ruiz, Raul"
+    },
+    "CA-26": {
+      "party": "D",
+      "name": "Brownley, Julia"
+    },
+    "CA-27": {
+      "party": "D",
+      "name": "Whitesides, George"
+    },
+    "CA-28": {
+      "party": "D",
+      "name": "Chu, Judy"
+    },
+    "CA-29": {
+      "party": "D",
+      "name": "Rivas, Luz M."
+    },
+    "CA-30": {
+      "party": "D",
+      "name": "Friedman, Laura"
+    },
+    "CA-31": {
+      "party": "D",
+      "name": "Cisneros, Gilbert Ray Jr."
+    },
+    "CA-32": {
+      "party": "D",
+      "name": "Sherman, Brad"
+    },
+    "CA-33": {
+      "party": "D",
+      "name": "Aguilar, Pete"
+    },
+    "CA-34": {
+      "party": "D",
+      "name": "Gomez, Jimmy"
+    },
+    "CA-35": {
+      "party": "D",
+      "name": "Torres, Norma J."
+    },
+    "CA-36": {
+      "party": "D",
+      "name": "Lieu, Ted"
+    },
+    "CA-37": {
+      "party": "D",
+      "name": "Kamlager-Dove, Sydney"
+    },
+    "CA-38": {
+      "party": "D",
+      "name": "Sánchez, Linda T."
+    },
+    "CA-39": {
+      "party": "D",
+      "name": "Takano, Mark"
+    },
+    "CA-40": {
+      "party": "R",
+      "name": "Kim, Young"
+    },
+    "CA-41": {
+      "party": "R",
+      "name": "Calvert, Ken"
+    },
+    "CA-42": {
+      "party": "D",
+      "name": "Garcia, Robert"
+    },
+    "CA-43": {
+      "party": "D",
+      "name": "Waters, Maxine"
+    },
+    "CA-44": {
+      "party": "D",
+      "name": "Barragán, Nanette Diaz"
+    },
+    "CA-45": {
+      "party": "D",
+      "name": "Tran, Derek"
+    },
+    "CA-46": {
+      "party": "D",
+      "name": "Correa, J. Luis"
+    },
+    "CA-47": {
+      "party": "D",
+      "name": "Min, Dave"
+    },
+    "CA-48": {
+      "party": "R",
+      "name": "Issa, Darrell"
+    },
+    "CA-49": {
+      "party": "D",
+      "name": "Levin, Mike"
+    },
+    "CA-50": {
+      "party": "D",
+      "name": "Peters, Scott H."
+    },
+    "CA-51": {
+      "party": "D",
+      "name": "Jacobs, Sara"
+    },
+    "CA-52": {
+      "party": "D",
+      "name": "Vargas, Juan"
+    },
+    "CO-01": {
+      "party": "D",
+      "name": "DeGette, Diana"
+    },
+    "CO-02": {
+      "party": "D",
+      "name": "Neguse, Joe"
+    },
+    "CO-03": {
+      "party": "R",
+      "name": "Hurd, Jeff"
+    },
+    "CO-04": {
+      "party": "R",
+      "name": "Boebert, Lauren"
+    },
+    "CO-05": {
+      "party": "R",
+      "name": "Crank, Jeff"
+    },
+    "CO-06": {
+      "party": "D",
+      "name": "Crow, Jason"
+    },
+    "CO-07": {
+      "party": "D",
+      "name": "Pettersen, Brittany"
+    },
+    "CO-08": {
+      "party": "R",
+      "name": "Evans, Gabe"
+    },
+    "CT-01": {
+      "party": "D",
+      "name": "Larson, John B."
+    },
+    "CT-02": {
+      "party": "D",
+      "name": "Courtney, Joe"
+    },
+    "CT-03": {
+      "party": "D",
+      "name": "DeLauro, Rosa L."
+    },
+    "CT-04": {
+      "party": "D",
+      "name": "Himes, James A."
+    },
+    "CT-05": {
+      "party": "D",
+      "name": "Hayes, Jahana"
+    },
+    "DE-AL": {
+      "party": "D",
+      "name": "McBride, Sarah"
+    },
+    "FL-01": {
+      "party": "R",
+      "name": "Patronis, Jimmy"
+    },
+    "FL-02": {
+      "party": "R",
+      "name": "Dunn, Neal P."
+    },
+    "FL-03": {
+      "party": "R",
+      "name": "Cammack, Kat"
+    },
+    "FL-04": {
+      "party": "R",
+      "name": "Bean, Aaron"
+    },
+    "FL-05": {
+      "party": "R",
+      "name": "Rutherford, John H."
+    },
+    "FL-06": {
+      "party": "R",
+      "name": "Fine, Randy"
+    },
+    "FL-07": {
+      "party": "R",
+      "name": "Mills, Cory"
+    },
+    "FL-08": {
+      "party": "R",
+      "name": "Haridopolos, Mike"
+    },
+    "FL-09": {
+      "party": "D",
+      "name": "Soto, Darren"
+    },
+    "FL-10": {
+      "party": "D",
+      "name": "Frost, Maxwell"
+    },
+    "FL-11": {
+      "party": "R",
+      "name": "Webster, Daniel"
+    },
+    "FL-12": {
+      "party": "R",
+      "name": "Bilirakis, Gus M."
+    },
+    "FL-13": {
+      "party": "R",
+      "name": "Luna, Anna Paulina"
+    },
+    "FL-14": {
+      "party": "D",
+      "name": "Castor, Kathy"
+    },
+    "FL-15": {
+      "party": "R",
+      "name": "Lee, Laurel M."
+    },
+    "FL-16": {
+      "party": "R",
+      "name": "Buchanan, Vern"
+    },
+    "FL-17": {
+      "party": "R",
+      "name": "Steube, W. Gregory"
+    },
+    "FL-18": {
+      "party": "R",
+      "name": "Franklin, Scott"
+    },
+    "FL-19": {
+      "party": "R",
+      "name": "Donalds, Byron"
+    },
+    "FL-21": {
+      "party": "R",
+      "name": "Mast, Brian J."
+    },
+    "FL-22": {
+      "party": "D",
+      "name": "Frankel, Lois"
+    },
+    "FL-23": {
+      "party": "D",
+      "name": "Moskowitz, Jared"
+    },
+    "FL-24": {
+      "party": "D",
+      "name": "Wilson, Frederica S."
+    },
+    "FL-25": {
+      "party": "D",
+      "name": "Wasserman Schultz, Debbie"
+    },
+    "FL-26": {
+      "party": "R",
+      "name": "Diaz-Balart, Mario"
+    },
+    "FL-27": {
+      "party": "R",
+      "name": "Salazar, Maria Elvira"
+    },
+    "FL-28": {
+      "party": "R",
+      "name": "Gimenez, Carlos A."
+    },
+    "GA-01": {
+      "party": "R",
+      "name": "Carter, Earl L. \"Buddy\""
+    },
+    "GA-02": {
+      "party": "D",
+      "name": "Bishop, Sanford D. Jr."
+    },
+    "GA-03": {
+      "party": "R",
+      "name": "Jack, Brian"
+    },
+    "GA-04": {
+      "party": "D",
+      "name": "Johnson, Henry C. \"Hank\" Jr."
+    },
+    "GA-05": {
+      "party": "D",
+      "name": "Williams, Nikema"
+    },
+    "GA-06": {
+      "party": "D",
+      "name": "McBath, Lucy"
+    },
+    "GA-07": {
+      "party": "R",
+      "name": "McCormick, Richard"
+    },
+    "GA-08": {
+      "party": "R",
+      "name": "Scott, Austin"
+    },
+    "GA-09": {
+      "party": "R",
+      "name": "Clyde, Andrew S."
+    },
+    "GA-10": {
+      "party": "R",
+      "name": "Collins, Mike"
+    },
+    "GA-11": {
+      "party": "R",
+      "name": "Loudermilk, Barry"
+    },
+    "GA-12": {
+      "party": "R",
+      "name": "Allen, Rick W."
+    },
+    "GA-13": {
+      "party": "D",
+      "name": "Blair, Everton Jr."
+    },
+    "GA-14": {
+      "party": "R",
+      "name": "Fuller, Clay"
+    },
+    "HI-01": {
+      "party": "D",
+      "name": "Case, Ed"
+    },
+    "HI-02": {
+      "party": "D",
+      "name": "Tokuda, Jill N."
+    },
+    "IA-01": {
+      "party": "R",
+      "name": "Miller-Meeks, Mariannette"
+    },
+    "IA-02": {
+      "party": "R",
+      "name": "Hinson, Ashley"
+    },
+    "IA-03": {
+      "party": "R",
+      "name": "Nunn, Zachary"
+    },
+    "IA-04": {
+      "party": "R",
+      "name": "Feenstra, Randy"
+    },
+    "ID-01": {
+      "party": "R",
+      "name": "Fulcher, Russ"
+    },
+    "ID-02": {
+      "party": "R",
+      "name": "Simpson, Michael K."
+    },
+    "IL-01": {
+      "party": "D",
+      "name": "Jackson, Jonathan L."
+    },
+    "IL-02": {
+      "party": "D",
+      "name": "Kelly, Robin L."
+    },
+    "IL-03": {
+      "party": "D",
+      "name": "Ramirez, Delia C."
+    },
+    "IL-04": {
+      "party": "D",
+      "name": "García, Jesús G. \"Chuy\""
+    },
+    "IL-05": {
+      "party": "D",
+      "name": "Quigley, Mike"
+    },
+    "IL-06": {
+      "party": "D",
+      "name": "Casten, Sean"
+    },
+    "IL-07": {
+      "party": "D",
+      "name": "Davis, Danny K."
+    },
+    "IL-08": {
+      "party": "D",
+      "name": "Krishnamoorthi, Raja"
+    },
+    "IL-09": {
+      "party": "D",
+      "name": "Schakowsky, Janice D."
+    },
+    "IL-10": {
+      "party": "D",
+      "name": "Schneider, Bradley Scott"
+    },
+    "IL-11": {
+      "party": "D",
+      "name": "Foster, Bill"
+    },
+    "IL-12": {
+      "party": "R",
+      "name": "Bost, Mike"
+    },
+    "IL-13": {
+      "party": "D",
+      "name": "Budzinski, Nikki"
+    },
+    "IL-14": {
+      "party": "D",
+      "name": "Underwood, Lauren"
+    },
+    "IL-15": {
+      "party": "R",
+      "name": "Miller, Mary E."
+    },
+    "IL-16": {
+      "party": "R",
+      "name": "LaHood, Darin"
+    },
+    "IL-17": {
+      "party": "D",
+      "name": "Sorensen, Eric"
+    },
+    "IN-01": {
+      "party": "D",
+      "name": "Mrvan, Frank J."
+    },
+    "IN-02": {
+      "party": "R",
+      "name": "Yakym, Rudy"
+    },
+    "IN-03": {
+      "party": "R",
+      "name": "Stutzman, Marlin A."
+    },
+    "IN-04": {
+      "party": "R",
+      "name": "Baird, James R."
+    },
+    "IN-05": {
+      "party": "R",
+      "name": "Spartz, Victoria"
+    },
+    "IN-06": {
+      "party": "R",
+      "name": "Shreve, Jefferson"
+    },
+    "IN-07": {
+      "party": "D",
+      "name": "Carson, André"
+    },
+    "IN-08": {
+      "party": "R",
+      "name": "Messmer, Mark B."
+    },
+    "IN-09": {
+      "party": "R",
+      "name": "Houchin, Erin"
+    },
+    "KS-01": {
+      "party": "R",
+      "name": "Mann, Tracey"
+    },
+    "KS-02": {
+      "party": "R",
+      "name": "Schmidt, Derek"
+    },
+    "KS-03": {
+      "party": "D",
+      "name": "Davids, Sharice"
+    },
+    "KS-04": {
+      "party": "R",
+      "name": "Estes, Ron"
+    },
+    "KY-01": {
+      "party": "R",
+      "name": "Comer, James"
+    },
+    "KY-02": {
+      "party": "R",
+      "name": "Guthrie, Brett"
+    },
+    "KY-03": {
+      "party": "D",
+      "name": "McGarvey, Morgan"
+    },
+    "KY-04": {
+      "party": "R",
+      "name": "Massie, Thomas"
+    },
+    "KY-05": {
+      "party": "R",
+      "name": "Rogers, Harold"
+    },
+    "KY-06": {
+      "party": "R",
+      "name": "Barr, Andy"
+    },
+    "LA-01": {
+      "party": "R",
+      "name": "Scalise, Steve"
+    },
+    "LA-02": {
+      "party": "D",
+      "name": "Carter, Troy A."
+    },
+    "LA-03": {
+      "party": "R",
+      "name": "Higgins, Clay"
+    },
+    "LA-04": {
+      "party": "R",
+      "name": "Johnson, Mike"
+    },
+    "LA-05": {
+      "party": "R",
+      "name": "Letlow, Julia"
+    },
+    "LA-06": {
+      "party": "D",
+      "name": "Fields, Cleo"
+    },
+    "MA-01": {
+      "party": "D",
+      "name": "Neal, Richard E."
+    },
+    "MA-02": {
+      "party": "D",
+      "name": "McGovern, James P."
+    },
+    "MA-03": {
+      "party": "D",
+      "name": "Trahan, Lori"
+    },
+    "MA-04": {
+      "party": "D",
+      "name": "Auchincloss, Jake"
+    },
+    "MA-05": {
+      "party": "D",
+      "name": "Clark, Katherine M."
+    },
+    "MA-06": {
+      "party": "D",
+      "name": "Moulton, Seth"
+    },
+    "MA-07": {
+      "party": "D",
+      "name": "Pressley, Ayanna"
+    },
+    "MA-08": {
+      "party": "D",
+      "name": "Lynch, Stephen F."
+    },
+    "MA-09": {
+      "party": "D",
+      "name": "Keating, William R."
+    },
+    "MD-01": {
+      "party": "R",
+      "name": "Harris, Andy"
+    },
+    "MD-02": {
+      "party": "D",
+      "name": "Olszewski, Johnny Jr."
+    },
+    "MD-03": {
+      "party": "D",
+      "name": "Elfreth, Sarah"
+    },
+    "MD-04": {
+      "party": "D",
+      "name": "Ivey, Glenn"
+    },
+    "MD-05": {
+      "party": "D",
+      "name": "Hoyer, Steny H."
+    },
+    "MD-06": {
+      "party": "D",
+      "name": "McClain Delaney, April"
+    },
+    "MD-07": {
+      "party": "D",
+      "name": "Mfume, Kweisi"
+    },
+    "MD-08": {
+      "party": "D",
+      "name": "Raskin, Jamie"
+    },
+    "ME-01": {
+      "party": "D",
+      "name": "Pingree, Chellie"
+    },
+    "ME-02": {
+      "party": "D",
+      "name": "Golden, Jared F."
+    },
+    "MI-01": {
+      "party": "R",
+      "name": "Bergman, Jack"
+    },
+    "MI-02": {
+      "party": "R",
+      "name": "Moolenaar, John R."
+    },
+    "MI-03": {
+      "party": "D",
+      "name": "Scholten, Hillary J."
+    },
+    "MI-04": {
+      "party": "R",
+      "name": "Huizenga, Bill"
+    },
+    "MI-05": {
+      "party": "R",
+      "name": "Walberg, Tim"
+    },
+    "MI-06": {
+      "party": "D",
+      "name": "Dingell, Debbie"
+    },
+    "MI-07": {
+      "party": "R",
+      "name": "Barrett, Tom"
+    },
+    "MI-08": {
+      "party": "D",
+      "name": "McDonald Rivet, Kristen"
+    },
+    "MI-09": {
+      "party": "R",
+      "name": "McClain, Lisa C."
+    },
+    "MI-10": {
+      "party": "R",
+      "name": "James, John"
+    },
+    "MI-11": {
+      "party": "D",
+      "name": "Stevens, Haley M."
+    },
+    "MI-12": {
+      "party": "D",
+      "name": "Tlaib, Rashida"
+    },
+    "MI-13": {
+      "party": "D",
+      "name": "Thanedar, Shri"
+    },
+    "MN-01": {
+      "party": "R",
+      "name": "Finstad, Brad"
+    },
+    "MN-02": {
+      "party": "D",
+      "name": "Craig, Angie"
+    },
+    "MN-03": {
+      "party": "D",
+      "name": "Morrison, Kelly"
+    },
+    "MN-04": {
+      "party": "D",
+      "name": "McCollum, Betty"
+    },
+    "MN-05": {
+      "party": "D",
+      "name": "Omar, Ilhan"
+    },
+    "MN-06": {
+      "party": "R",
+      "name": "Emmer, Tom"
+    },
+    "MN-07": {
+      "party": "R",
+      "name": "Fischbach, Michelle"
+    },
+    "MN-08": {
+      "party": "R",
+      "name": "Stauber, Pete"
+    },
+    "MO-01": {
+      "party": "D",
+      "name": "Bell, Wesley"
+    },
+    "MO-02": {
+      "party": "R",
+      "name": "Wagner, Ann"
+    },
+    "MO-03": {
+      "party": "R",
+      "name": "Onder, Robert F. Jr."
+    },
+    "MO-04": {
+      "party": "R",
+      "name": "Alford, Mark"
+    },
+    "MO-05": {
+      "party": "D",
+      "name": "Cleaver, Emanuel"
+    },
+    "MO-06": {
+      "party": "R",
+      "name": "Graves, Sam"
+    },
+    "MO-07": {
+      "party": "R",
+      "name": "Burlison, Eric"
+    },
+    "MO-08": {
+      "party": "R",
+      "name": "Smith, Jason"
+    },
+    "MS-01": {
+      "party": "R",
+      "name": "Kelly, Trent"
+    },
+    "MS-02": {
+      "party": "D",
+      "name": "Thompson, Bennie G."
+    },
+    "MS-03": {
+      "party": "R",
+      "name": "Guest, Michael"
+    },
+    "MS-04": {
+      "party": "R",
+      "name": "Ezell, Mike"
+    },
+    "MT-01": {
+      "party": "R",
+      "name": "Zinke, Ryan K."
+    },
+    "MT-02": {
+      "party": "R",
+      "name": "Downing, Troy"
+    },
+    "NC-01": {
+      "party": "D",
+      "name": "Davis, Donald G."
+    },
+    "NC-02": {
+      "party": "D",
+      "name": "Ross, Deborah K."
+    },
+    "NC-03": {
+      "party": "R",
+      "name": "Murphy, Gregory F."
+    },
+    "NC-04": {
+      "party": "D",
+      "name": "Foushee, Valerie P."
+    },
+    "NC-05": {
+      "party": "R",
+      "name": "Foxx, Virginia"
+    },
+    "NC-06": {
+      "party": "R",
+      "name": "McDowell, Addison P."
+    },
+    "NC-07": {
+      "party": "R",
+      "name": "Rouzer, David"
+    },
+    "NC-08": {
+      "party": "R",
+      "name": "Harris, Mark"
+    },
+    "NC-09": {
+      "party": "R",
+      "name": "Hudson, Richard"
+    },
+    "NC-10": {
+      "party": "R",
+      "name": "Harrigan, Pat"
+    },
+    "NC-11": {
+      "party": "R",
+      "name": "Edwards, Chuck"
+    },
+    "NC-12": {
+      "party": "D",
+      "name": "Adams, Alma S."
+    },
+    "NC-13": {
+      "party": "R",
+      "name": "Knott, Brad"
+    },
+    "NC-14": {
+      "party": "R",
+      "name": "Moore, Tim"
+    },
+    "ND-AL": {
+      "party": "R",
+      "name": "Fedorchak, Julie"
+    },
+    "NE-01": {
+      "party": "R",
+      "name": "Flood, Mike"
+    },
+    "NE-02": {
+      "party": "R",
+      "name": "Bacon, Don"
+    },
+    "NE-03": {
+      "party": "R",
+      "name": "Smith, Adrian"
+    },
+    "NH-01": {
+      "party": "D",
+      "name": "Pappas, Chris"
+    },
+    "NH-02": {
+      "party": "D",
+      "name": "Goodlander, Maggie"
+    },
+    "NJ-01": {
+      "party": "D",
+      "name": "Norcross, Donald"
+    },
+    "NJ-02": {
+      "party": "R",
+      "name": "Van Drew, Jefferson"
+    },
+    "NJ-03": {
+      "party": "D",
+      "name": "Conaway, Herbert C. Jr."
+    },
+    "NJ-04": {
+      "party": "R",
+      "name": "Smith, Christopher H."
+    },
+    "NJ-05": {
+      "party": "D",
+      "name": "Gottheimer, Josh"
+    },
+    "NJ-06": {
+      "party": "D",
+      "name": "Pallone, Frank Jr."
+    },
+    "NJ-07": {
+      "party": "R",
+      "name": "Kean, Thomas H. Jr."
+    },
+    "NJ-08": {
+      "party": "D",
+      "name": "Menendez, Robert"
+    },
+    "NJ-09": {
+      "party": "D",
+      "name": "Pou, Nellie"
+    },
+    "NJ-10": {
+      "party": "D",
+      "name": "McIver, LaMonica"
+    },
+    "NJ-11": {
+      "party": "D",
+      "name": "Mejia, Analilia"
+    },
+    "NJ-12": {
+      "party": "D",
+      "name": "Watson Coleman, Bonnie"
+    },
+    "NM-01": {
+      "party": "D",
+      "name": "Stansbury, Melanie A."
+    },
+    "NM-02": {
+      "party": "D",
+      "name": "Vasquez, Gabe"
+    },
+    "NM-03": {
+      "party": "D",
+      "name": "Leger Fernandez, Teresa"
+    },
+    "NV-01": {
+      "party": "D",
+      "name": "Titus, Dina"
+    },
+    "NV-02": {
+      "party": "R",
+      "name": "Amodei, Mark E."
+    },
+    "NV-03": {
+      "party": "D",
+      "name": "Lee, Susie"
+    },
+    "NV-04": {
+      "party": "D",
+      "name": "Horsford, Steven"
+    },
+    "NY-01": {
+      "party": "R",
+      "name": "LaLota, Nick"
+    },
+    "NY-02": {
+      "party": "R",
+      "name": "Garbarino, Andrew R."
+    },
+    "NY-03": {
+      "party": "D",
+      "name": "Suozzi, Thomas R."
+    },
+    "NY-04": {
+      "party": "D",
+      "name": "Gillen, Laura"
+    },
+    "NY-05": {
+      "party": "D",
+      "name": "Meeks, Gregory W."
+    },
+    "NY-06": {
+      "party": "D",
+      "name": "Meng, Grace"
+    },
+    "NY-07": {
+      "party": "D",
+      "name": "Velázquez, Nydia M."
+    },
+    "NY-08": {
+      "party": "D",
+      "name": "Jeffries, Hakeem S."
+    },
+    "NY-09": {
+      "party": "D",
+      "name": "Clarke, Yvette D."
+    },
+    "NY-10": {
+      "party": "D",
+      "name": "Goldman, Daniel S."
+    },
+    "NY-11": {
+      "party": "R",
+      "name": "Malliotakis, Nicole"
+    },
+    "NY-12": {
+      "party": "D",
+      "name": "Nadler, Jerrold"
+    },
+    "NY-13": {
+      "party": "D",
+      "name": "Espaillat, Adriano"
+    },
+    "NY-14": {
+      "party": "D",
+      "name": "Ocasio-Cortez, Alexandria"
+    },
+    "NY-15": {
+      "party": "D",
+      "name": "Torres, Ritchie"
+    },
+    "NY-16": {
+      "party": "D",
+      "name": "Latimer, George"
+    },
+    "NY-17": {
+      "party": "R",
+      "name": "Lawler, Michael"
+    },
+    "NY-18": {
+      "party": "D",
+      "name": "Ryan, Patrick"
+    },
+    "NY-19": {
+      "party": "D",
+      "name": "Riley, Josh"
+    },
+    "NY-20": {
+      "party": "D",
+      "name": "Tonko, Paul"
+    },
+    "NY-21": {
+      "party": "R",
+      "name": "Stefanik, Elise M."
+    },
+    "NY-22": {
+      "party": "D",
+      "name": "Mannion, John W."
+    },
+    "NY-23": {
+      "party": "R",
+      "name": "Langworthy, Nicholas A."
+    },
+    "NY-24": {
+      "party": "R",
+      "name": "Tenney, Claudia"
+    },
+    "NY-25": {
+      "party": "D",
+      "name": "Morelle, Joseph D."
+    },
+    "NY-26": {
+      "party": "D",
+      "name": "Kennedy, Timothy M."
+    },
+    "OH-01": {
+      "party": "D",
+      "name": "Landsman, Greg"
+    },
+    "OH-02": {
+      "party": "R",
+      "name": "Taylor, David J."
+    },
+    "OH-03": {
+      "party": "D",
+      "name": "Beatty, Joyce"
+    },
+    "OH-04": {
+      "party": "R",
+      "name": "Jordan, Jim"
+    },
+    "OH-05": {
+      "party": "R",
+      "name": "Latta, Robert E."
+    },
+    "OH-06": {
+      "party": "R",
+      "name": "Rulli, Michael A."
+    },
+    "OH-07": {
+      "party": "R",
+      "name": "Miller, Max L."
+    },
+    "OH-08": {
+      "party": "R",
+      "name": "Davidson, Warren"
+    },
+    "OH-09": {
+      "party": "D",
+      "name": "Kaptur, Marcy"
+    },
+    "OH-10": {
+      "party": "R",
+      "name": "Turner, Michael R."
+    },
+    "OH-11": {
+      "party": "D",
+      "name": "Brown, Shontel M."
+    },
+    "OH-12": {
+      "party": "R",
+      "name": "Balderson, Troy"
+    },
+    "OH-13": {
+      "party": "D",
+      "name": "Sykes, Emilia Strong"
+    },
+    "OH-14": {
+      "party": "R",
+      "name": "Joyce, David P."
+    },
+    "OH-15": {
+      "party": "R",
+      "name": "Carey, Mike"
+    },
+    "OK-01": {
+      "party": "R",
+      "name": "Hern, Kevin"
+    },
+    "OK-02": {
+      "party": "R",
+      "name": "Brecheen, Josh"
+    },
+    "OK-03": {
+      "party": "R",
+      "name": "Lucas, Frank D."
+    },
+    "OK-04": {
+      "party": "R",
+      "name": "Cole, Tom"
+    },
+    "OK-05": {
+      "party": "R",
+      "name": "Bice, Stephanie I."
+    },
+    "OR-01": {
+      "party": "D",
+      "name": "Bonamici, Suzanne"
+    },
+    "OR-02": {
+      "party": "R",
+      "name": "Bentz, Cliff"
+    },
+    "OR-03": {
+      "party": "D",
+      "name": "Dexter, Maxine"
+    },
+    "OR-04": {
+      "party": "D",
+      "name": "Hoyle, Val T."
+    },
+    "OR-05": {
+      "party": "D",
+      "name": "Bynum, Janelle S."
+    },
+    "OR-06": {
+      "party": "D",
+      "name": "Salinas, Andrea"
+    },
+    "PA-01": {
+      "party": "R",
+      "name": "Fitzpatrick, Brian K."
+    },
+    "PA-02": {
+      "party": "D",
+      "name": "Boyle, Brendan F."
+    },
+    "PA-03": {
+      "party": "D",
+      "name": "Evans, Dwight"
+    },
+    "PA-04": {
+      "party": "D",
+      "name": "Dean, Madeleine"
+    },
+    "PA-05": {
+      "party": "D",
+      "name": "Scanlon, Mary Gay"
+    },
+    "PA-06": {
+      "party": "D",
+      "name": "Houlahan, Chrissy"
+    },
+    "PA-07": {
+      "party": "R",
+      "name": "Mackenzie, Ryan"
+    },
+    "PA-08": {
+      "party": "R",
+      "name": "Bresnahan, Robert P. Jr."
+    },
+    "PA-09": {
+      "party": "R",
+      "name": "Meuser, Daniel"
+    },
+    "PA-10": {
+      "party": "R",
+      "name": "Perry, Scott"
+    },
+    "PA-11": {
+      "party": "R",
+      "name": "Smucker, Lloyd"
+    },
+    "PA-12": {
+      "party": "D",
+      "name": "Lee, Summer L."
+    },
+    "PA-13": {
+      "party": "R",
+      "name": "Joyce, John"
+    },
+    "PA-14": {
+      "party": "R",
+      "name": "Reschenthaler, Guy"
+    },
+    "PA-15": {
+      "party": "R",
+      "name": "Thompson, Glenn"
+    },
+    "PA-16": {
+      "party": "R",
+      "name": "Kelly, Mike"
+    },
+    "PA-17": {
+      "party": "D",
+      "name": "Deluzio, Christopher R."
+    },
+    "RI-01": {
+      "party": "D",
+      "name": "Amo, Gabe"
+    },
+    "RI-02": {
+      "party": "D",
+      "name": "Magaziner, Seth"
+    },
+    "SC-01": {
+      "party": "R",
+      "name": "Mace, Nancy"
+    },
+    "SC-02": {
+      "party": "R",
+      "name": "Wilson, Joe"
+    },
+    "SC-03": {
+      "party": "R",
+      "name": "Biggs, Sheri"
+    },
+    "SC-04": {
+      "party": "R",
+      "name": "Timmons, William R."
+    },
+    "SC-05": {
+      "party": "R",
+      "name": "Norman, Ralph"
+    },
+    "SC-06": {
+      "party": "D",
+      "name": "Clyburn, James E."
+    },
+    "SC-07": {
+      "party": "R",
+      "name": "Fry, Russell"
+    },
+    "SD-AL": {
+      "party": "R",
+      "name": "Johnson, Dusty"
+    },
+    "TN-01": {
+      "party": "R",
+      "name": "Harshbarger, Diana"
+    },
+    "TN-02": {
+      "party": "R",
+      "name": "Burchett, Tim"
+    },
+    "TN-03": {
+      "party": "R",
+      "name": "Fleischmann, Charles J. \"Chuck\""
+    },
+    "TN-04": {
+      "party": "R",
+      "name": "DesJarlais, Scott"
+    },
+    "TN-05": {
+      "party": "R",
+      "name": "Ogles, Andrew"
+    },
+    "TN-06": {
+      "party": "R",
+      "name": "Rose, John W."
+    },
+    "TN-07": {
+      "party": "R",
+      "name": "Van Epps, Matt"
+    },
+    "TN-08": {
+      "party": "R",
+      "name": "Kustoff, David"
+    },
+    "TN-09": {
+      "party": "D",
+      "name": "Cohen, Steve"
+    },
+    "TX-01": {
+      "party": "R",
+      "name": "Moran, Nathaniel"
+    },
+    "TX-02": {
+      "party": "R",
+      "name": "Crenshaw, Dan"
+    },
+    "TX-03": {
+      "party": "R",
+      "name": "Self, Keith"
+    },
+    "TX-04": {
+      "party": "R",
+      "name": "Fallon, Pat"
+    },
+    "TX-05": {
+      "party": "R",
+      "name": "Gooden, Lance"
+    },
+    "TX-06": {
+      "party": "R",
+      "name": "Ellzey, Jake"
+    },
+    "TX-07": {
+      "party": "D",
+      "name": "Fletcher, Lizzie"
+    },
+    "TX-08": {
+      "party": "R",
+      "name": "Luttrell, Morgan"
+    },
+    "TX-09": {
+      "party": "D",
+      "name": "Green, Al"
+    },
+    "TX-10": {
+      "party": "R",
+      "name": "McCaul, Michael T."
+    },
+    "TX-11": {
+      "party": "R",
+      "name": "Pfluger, August"
+    },
+    "TX-12": {
+      "party": "R",
+      "name": "Goldman, Craig A."
+    },
+    "TX-13": {
+      "party": "R",
+      "name": "Jackson, Ronny"
+    },
+    "TX-14": {
+      "party": "R",
+      "name": "Weber, Randy K. Sr."
+    },
+    "TX-15": {
+      "party": "R",
+      "name": "De La Cruz, Monica"
+    },
+    "TX-16": {
+      "party": "D",
+      "name": "Escobar, Veronica"
+    },
+    "TX-17": {
+      "party": "R",
+      "name": "Sessions, Pete"
+    },
+    "TX-18": {
+      "party": "D",
+      "name": "Menefee, Christian D."
+    },
+    "TX-19": {
+      "party": "R",
+      "name": "Arrington, Jodey C."
+    },
+    "TX-20": {
+      "party": "D",
+      "name": "Castro, Joaquin"
+    },
+    "TX-21": {
+      "party": "R",
+      "name": "Roy, Chip"
+    },
+    "TX-22": {
+      "party": "R",
+      "name": "Nehls, Troy E."
+    },
+    "TX-24": {
+      "party": "R",
+      "name": "Van Duyne, Beth"
+    },
+    "TX-25": {
+      "party": "R",
+      "name": "Williams, Roger"
+    },
+    "TX-26": {
+      "party": "R",
+      "name": "Gill, Brandon"
+    },
+    "TX-27": {
+      "party": "R",
+      "name": "Cloud, Michael"
+    },
+    "TX-28": {
+      "party": "D",
+      "name": "Cuellar, Henry"
+    },
+    "TX-29": {
+      "party": "D",
+      "name": "Garcia, Sylvia R."
+    },
+    "TX-30": {
+      "party": "D",
+      "name": "Crockett, Jasmine"
+    },
+    "TX-31": {
+      "party": "R",
+      "name": "Carter, John R."
+    },
+    "TX-32": {
+      "party": "D",
+      "name": "Johnson, Julie"
+    },
+    "TX-33": {
+      "party": "D",
+      "name": "Veasey, Marc A."
+    },
+    "TX-34": {
+      "party": "D",
+      "name": "Gonzalez, Vicente"
+    },
+    "TX-35": {
+      "party": "D",
+      "name": "Casar, Greg"
+    },
+    "TX-36": {
+      "party": "R",
+      "name": "Babin, Brian"
+    },
+    "TX-37": {
+      "party": "D",
+      "name": "Doggett, Lloyd"
+    },
+    "TX-38": {
+      "party": "R",
+      "name": "Hunt, Wesley"
+    },
+    "UT-01": {
+      "party": "R",
+      "name": "Moore, Blake D."
+    },
+    "UT-02": {
+      "party": "R",
+      "name": "Maloy, Celeste"
+    },
+    "UT-03": {
+      "party": "R",
+      "name": "Kennedy, Mike"
+    },
+    "UT-04": {
+      "party": "R",
+      "name": "Owens, Burgess"
+    },
+    "VA-01": {
+      "party": "R",
+      "name": "Wittman, Robert J."
+    },
+    "VA-02": {
+      "party": "R",
+      "name": "Kiggans, Jennifer A."
+    },
+    "VA-03": {
+      "party": "D",
+      "name": "Scott, Robert C. \"Bobby\""
+    },
+    "VA-04": {
+      "party": "D",
+      "name": "McClellan, Jennifer L."
+    },
+    "VA-05": {
+      "party": "R",
+      "name": "McGuire, John J."
+    },
+    "VA-06": {
+      "party": "R",
+      "name": "Cline, Ben"
+    },
+    "VA-07": {
+      "party": "D",
+      "name": "Vindman, Eugene Simon"
+    },
+    "VA-08": {
+      "party": "D",
+      "name": "Beyer, Donald S. Jr."
+    },
+    "VA-09": {
+      "party": "R",
+      "name": "Griffith, H. Morgan"
+    },
+    "VA-10": {
+      "party": "D",
+      "name": "Subramanyam, Suhas"
+    },
+    "VA-11": {
+      "party": "D",
+      "name": "Walkinshaw, James R."
+    },
+    "VT-AL": {
+      "party": "D",
+      "name": "Balint, Becca"
+    },
+    "WA-01": {
+      "party": "D",
+      "name": "DelBene, Suzan K."
+    },
+    "WA-02": {
+      "party": "D",
+      "name": "Larsen, Rick"
+    },
+    "WA-03": {
+      "party": "D",
+      "name": "Perez, Marie Gluesenkamp"
+    },
+    "WA-04": {
+      "party": "R",
+      "name": "Newhouse, Dan"
+    },
+    "WA-05": {
+      "party": "R",
+      "name": "Baumgartner, Michael"
+    },
+    "WA-06": {
+      "party": "D",
+      "name": "Randall, Emily"
+    },
+    "WA-07": {
+      "party": "D",
+      "name": "Jayapal, Pramila"
+    },
+    "WA-08": {
+      "party": "D",
+      "name": "Schrier, Kim"
+    },
+    "WA-09": {
+      "party": "D",
+      "name": "Smith, Adam"
+    },
+    "WA-10": {
+      "party": "D",
+      "name": "Strickland, Marilyn"
+    },
+    "WI-01": {
+      "party": "R",
+      "name": "Steil, Bryan"
+    },
+    "WI-02": {
+      "party": "D",
+      "name": "Pocan, Mark"
+    },
+    "WI-03": {
+      "party": "R",
+      "name": "Van Orden, Derrick"
+    },
+    "WI-04": {
+      "party": "D",
+      "name": "Moore, Gwen"
+    },
+    "WI-05": {
+      "party": "R",
+      "name": "Fitzgerald, Scott"
+    },
+    "WI-06": {
+      "party": "R",
+      "name": "Grothman, Glenn"
+    },
+    "WI-07": {
+      "party": "R",
+      "name": "Tiffany, Thomas P."
+    },
+    "WI-08": {
+      "party": "R",
+      "name": "Wied, Tony"
+    },
+    "WV-01": {
+      "party": "R",
+      "name": "Miller, Carol D."
+    },
+    "WV-02": {
+      "party": "R",
+      "name": "Moore, Riley M."
+    },
+    "WY-AL": {
+      "party": "R",
+      "name": "Hageman, Harriet M."
+    }
+  },
+  "senate": [
+    {
+      "state": "AK",
+      "class": 2,
+      "party": "R",
+      "name": "Sullivan, Dan"
+    },
+    {
+      "state": "AK",
+      "class": 3,
+      "party": "R",
+      "name": "Murkowski, Lisa"
+    },
+    {
+      "state": "AL",
+      "class": 2,
+      "party": "R",
+      "name": "Tuberville, Tommy"
+    },
+    {
+      "state": "AL",
+      "class": 3,
+      "party": "R",
+      "name": "Britt, Katie Boyd"
+    },
+    {
+      "state": "AR",
+      "class": 2,
+      "party": "R",
+      "name": "Cotton, Tom"
+    },
+    {
+      "state": "AR",
+      "class": 3,
+      "party": "R",
+      "name": "Boozman, John"
+    },
+    {
+      "state": "AZ",
+      "class": 1,
+      "party": "D",
+      "name": "Gallego, Ruben"
+    },
+    {
+      "state": "AZ",
+      "class": 3,
+      "party": "D",
+      "name": "Kelly, Mark"
+    },
+    {
+      "state": "CA",
+      "class": 1,
+      "party": "D",
+      "name": "Schiff, Adam B."
+    },
+    {
+      "state": "CA",
+      "class": 3,
+      "party": "D",
+      "name": "Padilla, Alex"
+    },
+    {
+      "state": "CO",
+      "class": 2,
+      "party": "D",
+      "name": "Hickenlooper, John W."
+    },
+    {
+      "state": "CO",
+      "class": 3,
+      "party": "D",
+      "name": "Bennet, Michael F."
+    },
+    {
+      "state": "CT",
+      "class": 1,
+      "party": "D",
+      "name": "Murphy, Christopher"
+    },
+    {
+      "state": "CT",
+      "class": 3,
+      "party": "D",
+      "name": "Blumenthal, Richard"
+    },
+    {
+      "state": "DE",
+      "class": 1,
+      "party": "D",
+      "name": "Blunt Rochester, Lisa"
+    },
+    {
+      "state": "DE",
+      "class": 2,
+      "party": "D",
+      "name": "Coons, Christopher A."
+    },
+    {
+      "state": "FL",
+      "class": 1,
+      "party": "R",
+      "name": "Scott, Rick"
+    },
+    {
+      "state": "FL",
+      "class": 3,
+      "party": "R",
+      "name": "Moody, Ashley"
+    },
+    {
+      "state": "GA",
+      "class": 2,
+      "party": "D",
+      "name": "Ossoff, Jon"
+    },
+    {
+      "state": "GA",
+      "class": 3,
+      "party": "D",
+      "name": "Warnock, Raphael G."
+    },
+    {
+      "state": "HI",
+      "class": 1,
+      "party": "D",
+      "name": "Hirono, Mazie K."
+    },
+    {
+      "state": "HI",
+      "class": 3,
+      "party": "D",
+      "name": "Schatz, Brian"
+    },
+    {
+      "state": "IA",
+      "class": 2,
+      "party": "R",
+      "name": "Ernst, Joni"
+    },
+    {
+      "state": "IA",
+      "class": 3,
+      "party": "R",
+      "name": "Grassley, Chuck"
+    },
+    {
+      "state": "ID",
+      "class": 2,
+      "party": "R",
+      "name": "Risch, James E."
+    },
+    {
+      "state": "ID",
+      "class": 3,
+      "party": "R",
+      "name": "Crapo, Mike"
+    },
+    {
+      "state": "IL",
+      "class": 2,
+      "party": "D",
+      "name": "Durbin, Richard J."
+    },
+    {
+      "state": "IL",
+      "class": 3,
+      "party": "D",
+      "name": "Duckworth, Tammy"
+    },
+    {
+      "state": "IN",
+      "class": 1,
+      "party": "R",
+      "name": "Banks, Jim"
+    },
+    {
+      "state": "IN",
+      "class": 3,
+      "party": "R",
+      "name": "Young, Todd"
+    },
+    {
+      "state": "KS",
+      "class": 2,
+      "party": "R",
+      "name": "Marshall, Roger"
+    },
+    {
+      "state": "KS",
+      "class": 3,
+      "party": "R",
+      "name": "Moran, Jerry"
+    },
+    {
+      "state": "KY",
+      "class": 2,
+      "party": "R",
+      "name": "McConnell, Mitch"
+    },
+    {
+      "state": "KY",
+      "class": 3,
+      "party": "R",
+      "name": "Paul, Rand"
+    },
+    {
+      "state": "LA",
+      "class": 2,
+      "party": "R",
+      "name": "Cassidy, Bill"
+    },
+    {
+      "state": "LA",
+      "class": 3,
+      "party": "R",
+      "name": "Kennedy, John"
+    },
+    {
+      "state": "MA",
+      "class": 1,
+      "party": "D",
+      "name": "Warren, Elizabeth"
+    },
+    {
+      "state": "MA",
+      "class": 2,
+      "party": "D",
+      "name": "Markey, Edward J."
+    },
+    {
+      "state": "MD",
+      "class": 1,
+      "party": "D",
+      "name": "Alsobrooks, Angela D."
+    },
+    {
+      "state": "MD",
+      "class": 3,
+      "party": "D",
+      "name": "Van Hollen, Chris"
+    },
+    {
+      "state": "ME",
+      "class": 1,
+      "party": "I",
+      "name": "King, Angus S., Jr."
+    },
+    {
+      "state": "ME",
+      "class": 2,
+      "party": "R",
+      "name": "Collins, Susan M."
+    },
+    {
+      "state": "MI",
+      "class": 1,
+      "party": "D",
+      "name": "Slotkin, Elissa"
+    },
+    {
+      "state": "MI",
+      "class": 2,
+      "party": "D",
+      "name": "Peters, Gary C."
+    },
+    {
+      "state": "MN",
+      "class": 1,
+      "party": "D",
+      "name": "Klobuchar, Amy"
+    },
+    {
+      "state": "MN",
+      "class": 2,
+      "party": "D",
+      "name": "Smith, Tina"
+    },
+    {
+      "state": "MO",
+      "class": 1,
+      "party": "R",
+      "name": "Hawley, Josh"
+    },
+    {
+      "state": "MO",
+      "class": 3,
+      "party": "R",
+      "name": "Schmitt, Eric"
+    },
+    {
+      "state": "MS",
+      "class": 1,
+      "party": "R",
+      "name": "Wicker, Roger F."
+    },
+    {
+      "state": "MS",
+      "class": 2,
+      "party": "R",
+      "name": "Hyde-Smith, Cindy"
+    },
+    {
+      "state": "MT",
+      "class": 1,
+      "party": "R",
+      "name": "Sheehy, Tim"
+    },
+    {
+      "state": "MT",
+      "class": 2,
+      "party": "R",
+      "name": "Daines, Steve"
+    },
+    {
+      "state": "NC",
+      "class": 2,
+      "party": "R",
+      "name": "Tillis, Thom"
+    },
+    {
+      "state": "NC",
+      "class": 3,
+      "party": "R",
+      "name": "Budd, Ted"
+    },
+    {
+      "state": "ND",
+      "class": 1,
+      "party": "R",
+      "name": "Cramer, Kevin"
+    },
+    {
+      "state": "ND",
+      "class": 3,
+      "party": "R",
+      "name": "Hoeven, John"
+    },
+    {
+      "state": "NE",
+      "class": 1,
+      "party": "R",
+      "name": "Fischer, Deb"
+    },
+    {
+      "state": "NE",
+      "class": 2,
+      "party": "R",
+      "name": "Ricketts, Pete"
+    },
+    {
+      "state": "NH",
+      "class": 2,
+      "party": "D",
+      "name": "Shaheen, Jeanne"
+    },
+    {
+      "state": "NH",
+      "class": 3,
+      "party": "D",
+      "name": "Hassan, Margaret Wood"
+    },
+    {
+      "state": "NJ",
+      "class": 1,
+      "party": "D",
+      "name": "Kim, Andy"
+    },
+    {
+      "state": "NJ",
+      "class": 2,
+      "party": "D",
+      "name": "Booker, Cory A."
+    },
+    {
+      "state": "NM",
+      "class": 1,
+      "party": "D",
+      "name": "Heinrich, Martin"
+    },
+    {
+      "state": "NM",
+      "class": 2,
+      "party": "D",
+      "name": "Luján, Ben Ray"
+    },
+    {
+      "state": "NV",
+      "class": 1,
+      "party": "D",
+      "name": "Rosen, Jacky"
+    },
+    {
+      "state": "NV",
+      "class": 3,
+      "party": "D",
+      "name": "Cortez Masto, Catherine"
+    },
+    {
+      "state": "NY",
+      "class": 1,
+      "party": "D",
+      "name": "Gillibrand, Kirsten E."
+    },
+    {
+      "state": "NY",
+      "class": 3,
+      "party": "D",
+      "name": "Schumer, Charles E."
+    },
+    {
+      "state": "OH",
+      "class": 1,
+      "party": "R",
+      "name": "Moreno, Bernie"
+    },
+    {
+      "state": "OH",
+      "class": 3,
+      "party": "R",
+      "name": "Husted, Jon"
+    },
+    {
+      "state": "OK",
+      "class": 2,
+      "party": "R",
+      "name": "Armstrong, Alan"
+    },
+    {
+      "state": "OK",
+      "class": 3,
+      "party": "R",
+      "name": "Lankford, James"
+    },
+    {
+      "state": "OR",
+      "class": 2,
+      "party": "D",
+      "name": "Merkley, Jeff"
+    },
+    {
+      "state": "OR",
+      "class": 3,
+      "party": "D",
+      "name": "Wyden, Ron"
+    },
+    {
+      "state": "PA",
+      "class": 1,
+      "party": "R",
+      "name": "McCormick, David"
+    },
+    {
+      "state": "PA",
+      "class": 3,
+      "party": "D",
+      "name": "Fetterman, John"
+    },
+    {
+      "state": "RI",
+      "class": 1,
+      "party": "D",
+      "name": "Whitehouse, Sheldon"
+    },
+    {
+      "state": "RI",
+      "class": 2,
+      "party": "D",
+      "name": "Reed, Jack"
+    },
+    {
+      "state": "SC",
+      "class": 2,
+      "party": "R",
+      "name": "Graham, Darline"
+    },
+    {
+      "state": "SC",
+      "class": 3,
+      "party": "R",
+      "name": "Scott, Tim"
+    },
+    {
+      "state": "SD",
+      "class": 2,
+      "party": "R",
+      "name": "Rounds, Mike"
+    },
+    {
+      "state": "SD",
+      "class": 3,
+      "party": "R",
+      "name": "Thune, John"
+    },
+    {
+      "state": "TN",
+      "class": 1,
+      "party": "R",
+      "name": "Blackburn, Marsha"
+    },
+    {
+      "state": "TN",
+      "class": 2,
+      "party": "R",
+      "name": "Hagerty, Bill"
+    },
+    {
+      "state": "TX",
+      "class": 1,
+      "party": "R",
+      "name": "Cruz, Ted"
+    },
+    {
+      "state": "TX",
+      "class": 2,
+      "party": "R",
+      "name": "Cornyn, John"
+    },
+    {
+      "state": "UT",
+      "class": 1,
+      "party": "R",
+      "name": "Curtis, John R."
+    },
+    {
+      "state": "UT",
+      "class": 3,
+      "party": "R",
+      "name": "Lee, Mike"
+    },
+    {
+      "state": "VA",
+      "class": 1,
+      "party": "D",
+      "name": "Kaine, Tim"
+    },
+    {
+      "state": "VA",
+      "class": 2,
+      "party": "D",
+      "name": "Warner, Mark R."
+    },
+    {
+      "state": "VT",
+      "class": 1,
+      "party": "I",
+      "name": "Sanders, Bernard"
+    },
+    {
+      "state": "VT",
+      "class": 3,
+      "party": "D",
+      "name": "Welch, Peter"
+    },
+    {
+      "state": "WA",
+      "class": 1,
+      "party": "D",
+      "name": "Cantwell, Maria"
+    },
+    {
+      "state": "WA",
+      "class": 3,
+      "party": "D",
+      "name": "Murray, Patty"
+    },
+    {
+      "state": "WI",
+      "class": 1,
+      "party": "D",
+      "name": "Baldwin, Tammy"
+    },
+    {
+      "state": "WI",
+      "class": 3,
+      "party": "R",
+      "name": "Johnson, Ron"
+    },
+    {
+      "state": "WV",
+      "class": 1,
+      "party": "R",
+      "name": "Justice, James C."
+    },
+    {
+      "state": "WV",
+      "class": 2,
+      "party": "R",
+      "name": "Capito, Shelley Moore"
+    },
+    {
+      "state": "WY",
+      "class": 1,
+      "party": "R",
+      "name": "Barrasso, John"
+    },
+    {
+      "state": "WY",
+      "class": 2,
+      "party": "R",
+      "name": "Lummis, Cynthia M."
+    }
+  ],
+  "governors": {
+    "AK": {
+      "party": "R",
+      "name": "Mike Dunleavy"
+    },
+    "AL": {
+      "party": "R",
+      "name": "Kay Ivey"
+    },
+    "AR": {
+      "party": "R",
+      "name": "Sarah Huckabee Sanders"
+    },
+    "AZ": {
+      "party": "D",
+      "name": "Katie Hobbs"
+    },
+    "CA": {
+      "party": "D",
+      "name": "Gavin Newsom"
+    },
+    "CO": {
+      "party": "D",
+      "name": "Jared Polis"
+    },
+    "CT": {
+      "party": "D",
+      "name": "Ned Lamont"
+    },
+    "DE": {
+      "party": "D",
+      "name": "Matt Meyer"
+    },
+    "FL": {
+      "party": "R",
+      "name": "Ron DeSantis"
+    },
+    "GA": {
+      "party": "R",
+      "name": "Brian Kemp"
+    },
+    "HI": {
+      "party": "D",
+      "name": "Josh Green"
+    },
+    "IA": {
+      "party": "R",
+      "name": "Kim Reynolds"
+    },
+    "ID": {
+      "party": "R",
+      "name": "Brad Little"
+    },
+    "IL": {
+      "party": "D",
+      "name": "JB Pritzker"
+    },
+    "IN": {
+      "party": "R",
+      "name": "Mike Braun"
+    },
+    "KS": {
+      "party": "D",
+      "name": "Laura Kelly"
+    },
+    "KY": {
+      "party": "D",
+      "name": "Andy Beshear"
+    },
+    "LA": {
+      "party": "R",
+      "name": "Jeff Landry"
+    },
+    "MA": {
+      "party": "D",
+      "name": "Maura Healey"
+    },
+    "MD": {
+      "party": "D",
+      "name": "Wes Moore"
+    },
+    "ME": {
+      "party": "D",
+      "name": "Janet Mills"
+    },
+    "MI": {
+      "party": "D",
+      "name": "Gretchen Whitmer"
+    },
+    "MN": {
+      "party": "D",
+      "name": "Tim Walz"
+    },
+    "MO": {
+      "party": "R",
+      "name": "Mike Kehoe"
+    },
+    "MS": {
+      "party": "R",
+      "name": "Tate Reeves"
+    },
+    "MT": {
+      "party": "R",
+      "name": "Greg Gianforte"
+    },
+    "NC": {
+      "party": "D",
+      "name": "Josh Stein"
+    },
+    "ND": {
+      "party": "R",
+      "name": "Kelly Armstrong"
+    },
+    "NE": {
+      "party": "R",
+      "name": "Jim Pillen"
+    },
+    "NH": {
+      "party": "R",
+      "name": "Kelly Ayotte"
+    },
+    "NJ": {
+      "party": "D",
+      "name": "Mikie Sherrill"
+    },
+    "NM": {
+      "party": "D",
+      "name": "Michelle Lujan Grisham"
+    },
+    "NV": {
+      "party": "R",
+      "name": "Joe Lombardo"
+    },
+    "NY": {
+      "party": "D",
+      "name": "Kathy Hochul"
+    },
+    "OH": {
+      "party": "R",
+      "name": "Mike DeWine"
+    },
+    "OK": {
+      "party": "R",
+      "name": "Kevin Stitt"
+    },
+    "OR": {
+      "party": "D",
+      "name": "Tina Kotek"
+    },
+    "PA": {
+      "party": "D",
+      "name": "Josh Shapiro"
+    },
+    "RI": {
+      "party": "D",
+      "name": "Dan McKee"
+    },
+    "SC": {
+      "party": "R",
+      "name": "Henry McMaster"
+    },
+    "SD": {
+      "party": "R",
+      "name": "Larry Rhoden"
+    },
+    "TN": {
+      "party": "R",
+      "name": "Bill Lee"
+    },
+    "TX": {
+      "party": "R",
+      "name": "Greg Abbott"
+    },
+    "UT": {
+      "party": "R",
+      "name": "Spencer Cox"
+    },
+    "VA": {
+      "party": "D",
+      "name": "Abigail Spanberger"
+    },
+    "VT": {
+      "party": "R",
+      "name": "Phil Scott"
+    },
+    "WA": {
+      "party": "D",
+      "name": "Bob Ferguson"
+    },
+    "WI": {
+      "party": "D",
+      "name": "Tony Evers"
+    },
+    "WV": {
+      "party": "R",
+      "name": "Patrick Morrisey"
+    },
+    "WY": {
+      "party": "R",
+      "name": "Mark Gordon"
+    }
+  }
+}

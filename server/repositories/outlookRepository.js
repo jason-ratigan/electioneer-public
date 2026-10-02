@@ -1,8 +1,9 @@
 import {all} from '../db.js';
+import {officeholderBaseline} from '../outlook/baseline.js';
 export async function getOutlook(req,res) {
   const office=String(req.query.office||'us_senate'),cycle=Number(req.query.cycle||2026);
   if(!['us_senate','us_house','governor','president'].includes(office)||!Number.isInteger(cycle)||cycle<1900||cycle>2100) return res.status(400).json({error:'Choose a supported office and cycle.'});
-  const [polls,states,districts,averages]=await Promise.all([
+  const [polls,states,districts,averages,candidates]=await Promise.all([
     all(`WITH current AS (SELECT DISTINCT ON(source_id,source_identifier) * FROM poll_questions WHERE source_identifier IS NOT NULL ORDER BY source_id,source_identifier,recorded_at DESC,id DESC)
     SELECT q.id,q.polling_race_id AS race_id,q.question_kind AS kind,q.office_slug AS office,q.cycle,q.stage,q.field_start::text,q.field_end::text,q.sample_size,q.population,
     q.metadata->>'seat_number' AS district,q.metadata->>'election_date' AS election_date,q.metadata->>'hypothetical' AS hypothetical,q.metadata->>'subpopulation' AS subpopulation,
@@ -16,7 +17,14 @@ export async function getOutlook(req,res) {
     ORDER BY q.field_end DESC,q.id`,[office,cycle]),
     all(`SELECT abbreviation AS state,name,state_fips FROM geographies WHERE geography_type='state' ORDER BY name`),
     office==='us_house'?all(`SELECT DISTINCT g.abbreviation,g.state_fips FROM geographies g JOIN geography_versions v ON v.geography_id=g.id WHERE g.geography_type='congressional_district' AND v.valid_from<=make_date($1,11,3) AND (v.valid_to IS NULL OR v.valid_to>=make_date($1,11,3))`,[cycle]):[],
-    all(`SELECT DISTINCT ON(source_id,series_identifier,observed_on,response_label) series_identifier,observed_on::text,response_label,share FROM published_poll_averages ORDER BY source_id,series_identifier,observed_on,response_label,recorded_at DESC,id DESC`)
+    all(`SELECT DISTINCT ON(source_id,series_identifier,observed_on,response_label) series_identifier,observed_on::text,response_label,share FROM published_poll_averages ORDER BY source_id,series_identifier,observed_on,response_label,recorded_at DESC,id DESC`),
+    cycle===2026 && ['us_house','us_senate','governor'].includes(office)
+      ? all(`SELECT r.candidate_id::text AS id,g.abbreviation AS seat,r.candidate_name AS name,p.abbreviation AS party,s.name AS source
+        FROM candidate_roster_entries r JOIN offices o ON o.id=r.office_id
+        JOIN geographies g ON g.id=r.district_geography_id
+        LEFT JOIN parties p ON p.id=r.party_id JOIN data_sources s ON s.id=r.source_id
+        WHERE r.cycle=2026 AND o.slug=$1 AND r.roster_status='general_candidate'
+        ORDER BY g.abbreviation,r.candidate_name,s.name`,[office]) : []
   ]);
-  res.json({data:{office,cycle,polls,states,districts,averages}});
+  res.json({data:{office,cycle,polls,states,districts,averages,candidates,baseline:officeholderBaseline(office,cycle)}});
 }

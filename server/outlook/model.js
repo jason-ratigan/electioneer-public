@@ -51,17 +51,27 @@ export function mappedSeat(q,districts=[]) {
   const key=code?`${q.state}-${code}`:null;
   return districts.some(d=>d.abbreviation===key)?key:null;
 }
-export function controlSummary(races,{total=435,holdD=0,holdR=0,swing=0,overrides={}}={}) {
-  const counts={D:holdD,R:holdR,competitive:0,unknown:0};
+export function controlSummary(races,{total=435,holdD=0,holdR=0,holdOther=0,swing=0,overrides={},useBaseline=true}={}) {
+  const counts={D:holdD,R:holdR,other:holdOther,competitive:0,unknown:0};
+  const sources={picked:0,polled:0,incumbent:0};
   // Multiple source races for a seat never create extra seats.
   const groups=new Map();
   for(const race of races) if(race.seatKey && race.state!=='DC') { const list=groups.get(race.seatKey)||[];list.push(race);groups.set(race.seatKey,list); }
   for(const group of groups.values()) {
     const race=group[0];
     const selected=overrides[race.seatKey];
-    const status=selected|| (group.length===1 ? category(race.lead.margin==null?null:race.lead.margin+swing) : 'unknown');
+    let status='unknown';
+    if(selected) {
+      const party=typeof selected==='string'?selected:selected.party;
+      status=party==='D'||party==='R'||party==='competitive'||party==='unknown'?party:'other';
+      sources.picked++;
+    } else if(group.length===1 && race.lead.margin!=null) {
+      status=category(race.lead.margin+swing);sources.polled++;
+    } else if(group.length===1 && useBaseline && race.incumbent?.party) {
+      status=['D','R'].includes(race.incumbent.party)?race.incumbent.party:'other';sources.incumbent++;
+    }
     counts[status in counts?status:'unknown']++;
   }
   counts.unknown += Math.max(0,total-Object.values(counts).reduce((a,b)=>a+b,0));
-  return {...counts,total,majority:Math.floor(total/2)+1};
+  return {...counts,total,majority:Math.floor(total/2)+1,sources};
 }

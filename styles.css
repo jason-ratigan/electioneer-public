@@ -159,6 +159,12 @@ main{margin-left:232px;min-height:100vh}
 .import-history button { display:flex; flex-direction:column; gap:7px; text-align:left; background:#f6f8fb; border:1px solid transparent; border-radius:7px; padding:12px; width:100%; margin:8px 0; cursor:pointer; overflow-wrap:anywhere; }
 .import-history button.selected { border-color:#416bad; background:#eaf1fc; }
 .import-history small { color:#64758b; }.import-history span { text-transform:capitalize; }
+.nyt-refresh-status { margin-top:16px; border-top:1px solid #dce3ec; }
+.nyt-refresh-status ul { list-style:none; padding:0; margin:8px 0; display:grid; gap:6px; }
+.nyt-refresh-status li { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px 18px; padding:7px 0; border-bottom:1px solid #edf1f5; }
+.nyt-refresh-status li button { border:0; background:none; color:#23549b; cursor:pointer; padding:0; text-decoration:underline; text-align:left; }
+.nyt-refresh-status li span { color:#52647a; text-transform:capitalize; }
+.nyt-refresh-status li small { flex-basis:100%; color:#a63333; }
 .preview-grid { display:grid; grid-template-columns:150px 1fr; gap:10px; font-size:14px; }.preview-grid dd { margin:0; overflow-wrap:anywhere; }.preview-grid dt { color:#65728a; }
 .preview-counts { display:flex; flex-wrap:wrap; gap:12px; }.preview-counts span { background:#edf3fb; padding:12px; border-radius:8px; }.preview-counts b { font-size:22px; display:block; }
 .import-detail pre,.poll-card pre { white-space:pre-wrap; overflow-wrap:anywhere; max-height:400px; overflow:auto; font-size:12px; background:#f5f7fa; padding:14px; }
