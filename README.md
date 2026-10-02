@@ -1,6 +1,12 @@
 # Electioneer
 
-Electioneer is an election data explorer with a React/Vite client, Express API, and PostgreSQL/PostGIS database. It supports general, primary, runoff, special, and presidential contests. Source results are stored as immutable batches and snapshots so historical revisions and election-night trends can be reconstructed.
+Electioneer explores U.S. election results and polling with a React/Vite client, Express API, and PostgreSQL/PostGIS database. Imported observations and official results remain separate from the site's descriptive polling averages. The app does not produce election forecasts.
+
+## What this branch includes
+
+- A 2026 polling map, poll library, and published presidential approval averages.
+- Historical results, district and county maps, and presidential Electoral College results.
+- Reviewed CSV/ZIP imports through an authenticated admin page, plus source-specific command-line importers.
 
 ## Architecture
 
@@ -15,27 +21,36 @@ The API uses controller → service → repository separation:
 
 ## Run
 
-After installing the dependencies once with `npm install`, start the entire development stack with one command:
+Install Node.js 22 or newer and Docker with Compose. Then install the locked dependencies and start the development stack:
 
 ```bash
+npm ci
 npm run dev
 ```
 
+On Windows PowerShell, use `npm.cmd` in place of `npm` if script execution is restricted. Python 3 and the requirements files are needed for the Python-based collectors and parser tests.
+
 This starts PostgreSQL/PostGIS through Docker Compose, waits for it to become healthy, and then launches both the API and web client. The API applies any pending migrations during startup. The database volume is preserved between runs, so imported election data remains available. Press `Ctrl+C` to stop the application processes; use `npm run db:down` when you also want to stop PostgreSQL.
 
-The web client runs at `http://localhost:4173`; the API runs at `http://localhost:3000`. Production uses `npm run build && npm start`. The default development connection is `postgresql://signal:signal@localhost:15432/signal`; set `DATABASE_URL` for another PostgreSQL instance. The development port avoids colliding with a system PostgreSQL installation and the Windows reserved port range that includes 55432. Set `DATABASE_SSL=true` when the provider requires TLS. The bundled Compose service uses PostgreSQL 17 with PostGIS 3.5.
+The web client runs at `http://localhost:4173`; the API runs at `http://localhost:3000`. Production uses `npm run build && npm start`. The default development connection is `postgresql://signal:signal@localhost:15432/signal`; these are local database identifiers, not the application name. Set `DATABASE_URL` for another PostgreSQL instance. The development port avoids colliding with a system PostgreSQL installation and the Windows reserved port range that includes 55432. Set `DATABASE_SSL=true` when the provider requires TLS. The bundled Compose service uses PostgreSQL 17 with PostGIS 3.5.
 
-New databases start empty. Development fixtures and source imports are explicit operations; application startup never inserts illustrative election data.
+Migrations seed certified presidential Electoral College votes for 2000–2024 and 2028 state allocations. Popular-vote results, geographic boundaries, candidate rosters, and polls require separate source imports. Downloaded source files and local database contents are not included in this repository.
+
+## 2026 polling explorer
+
+The home page opens the Senate, governor, and House polling map. Move the date to inspect earlier polls, compare candidate matchups, and open source questions. Control scenarios are temporary; unpolled races remain unresolved. National approval and generic-ballot polls remain separate from state races.
+
+The polling average is a descriptive calculation, not a probability or forecast. Historical results, the poll library, and admin imports are available from the sidebar. See [polling outlook methodology and usage](docs/polling-outlook.md) for sources, exclusions, and limits.
 
 ## Admin CSV and ZIP imports
 
 Open **Admin imports** (`/#admin`) to upload NYT polling CSVs, published approval averages, MEDSL 2024 state precinct downloads, MEDSL 2020 House files, or documented VEST 2020 archives. Set a random `ADMIN_IMPORT_TOKEN` of at least 32 characters in the API process environment first; admin endpoints are disabled without it. The token is entered in the admin page and is never bundled into the client.
 
-Uploads are privately staged and validated asynchronously. Review the source, actual row scope, proposed changes, unresolved mappings and warnings, then explicitly confirm publication. Commit is transactional, retries are idempotent, corrections retain previous observations, and import history includes checksums and audit reports. The **Polls** view now displays individual questions with sample/population, field dates, responses and NYT attribution; Times-published approval averages appear separately from raw polls and model estimates.
+Uploads are privately staged and validated asynchronously. Review the source, actual row scope, proposed changes, unresolved mappings and warnings, then explicitly confirm publication. Commit is transactional, retries are idempotent, corrections retain previous observations, and import history includes checksums and audit reports. The **Polls** view displays individual questions with sample/population, field dates, responses and NYT attribution; Times-published approval averages appear separately from raw polls and model estimates.
 
-See [Admin import workflow, supported formats, attribution and testing](docs/admin-imports.md) for setup, source limitations, ZIP limits and the API. The full 2020 MEDSL and VEST ZIPs were not present for real-file end-to-end verification. The supplied `2024-president-state.csv` is not election data and needs replacing with the real repository download. Other-year MEDSL and primary/runoff result formats require their exact files and codebooks; they are never guessed from a filename.
+See [Admin import workflow, supported formats, attribution and testing](docs/admin-imports.md) for setup, source limitations, ZIP limits and the API. Third-party CSVs and ZIPs are not shipped with this repository. Download them from the linked providers and check their licenses and codebooks. Importers validate file contents rather than inferring a source from its filename; unsupported years, primary/runoff files, and layouts need separate adapters.
 
-Run `npm run test:imports` for import parsing, mapping, authentication, revision, idempotency and rollback tests. `npm run test:imports:e2e` exercises upload/preview/confirm/publication against a disposable PostgreSQL database using all supplied NYT files and a real MEDSL ZIP.
+With the downloaded fixtures and a migrated development database, run `npm run test:imports` for parsing, mapping, authentication, revision, idempotency and rollback tests. `npm run test:imports:e2e` exercises upload, preview, confirmation, and publication against a disposable PostgreSQL database. It requires separately downloaded NYT files and a real MEDSL ZIP; those files are ignored by Git.
 
 For a local bulk update, run `npm run import:admin -- --polling-dir polling` to stage previews, or add `--commit` to explicitly publish the validated files. The command applies migrations and uses the same transaction, provenance and audit pipeline as the admin page. Repeated downloads are safe to rerun.
 
@@ -176,6 +191,7 @@ The older Ballotpedia live collector remains in the repository for reproducibili
 - `GET /api/hub/options`
 - `GET /api/hub/overview?office=president&cycle=2020&stage=general`
 - `GET /api/hub/electoral-college?cycle=2024`
+- `GET /api/hub/outlook?office=us_senate&cycle=2026`
 - `GET /api/hub/districts?cycle=2020&stage=general`
 - `GET /api/hub/contests/:id/geographies?level=county|precinct`
 - `GET /api/races/:id/history`
@@ -199,28 +215,23 @@ There is deliberately no generic result-write endpoint. Results enter through va
 - `geographies`, `geography_versions`, and `geography_relationships` support dated PostGIS boundaries, containment, reporting relationships, and crosswalk allocations.
 - `polls`, `poll_questions`, and `poll_responses` are separate from official results. Source questions retain their own sampling and immutable revisions; generic ballot and approval questions do not require a contest.
 - `published_poll_averages` stores attributed publisher time series independently of `model_estimates`. `admin_imports` records staging, confirmation and publication audit state.
-- `model_runs` and `model_estimates` hold poll averages, projections, and election-night scenarios without changing source vote totals.
+- `model_runs` and `model_estimates` are reserved for future model output. The current descriptive polling average is calculated for display and does not change source vote totals.
 - `data_sources`, `source_artifacts`, source-ID mapping tables, and `ingestion_runs` preserve lineage and importer audit data.
 
-## Agreed archive policy
+## Data scope and current limits
 
-- General election results begin in 2000.
-- Primary results and polling observations begin in 2014.
-- Historical municipal, county, local-primary, and ballot-measure records are excluded.
-- Historical statewide offices are excluded except governor; federal offices remain in scope.
-- Source updates are user-initiated through the authenticated admin upload/preview/confirm workflow; there is no source-fetch scheduler.
-- PostgreSQL exposes database size and record counts at `GET /api/storage`.
-- Initial adapters are planned for OpenElections, VEST, state election offices, and optionally AP Elections after credentials are configured. Provider ingestion remains intentionally unimplemented until formats and credentials are supplied.
+- General election results begin in 2000; primary results and polling observations begin in 2014. Historical local races and ballot measures are outside the current scope.
+- VEST and MEDSL result importers, Census boundaries, candidate-source importers, and NYT poll imports are implemented. OpenElections, state-office feeds, and AP Elections are not.
+- Administrator uploads require preview and confirmation; no scheduler or general live-results feed is configured. `GET /api/storage` reports database size and record counts.
+- The polling outlook is descriptive. It does not estimate win probabilities, calibrated uncertainty, or election-night outcomes.
 
-## Remaining inputs needed before production integration
+## Before deployment
 
-1. Licensed polling/results providers and credentials.
-2. The initial states and federal offices to prioritize within the agreed archive scope.
-3. The exact weighting methodology and rules for partisan and AAA pollsters, recency, revisions, and exclusions.
-4. Official-source precedence and correction rules for manual election-night refreshes.
-5. PostgreSQL backup, retention, and deployment-provider preferences.
+Set a random `ADMIN_IMPORT_TOKEN` of at least 32 characters, use HTTPS, and protect the single-operator credential. Back up PostgreSQL together with `.import-storage/`; its staged artifacts are referenced by database records. Configure production database credentials and review source-specific licensing and attribution.
 
-The database starts without popular vote, candidate, or polling records. Certified presidential Electoral College results for 2000–2024 and 2028 allocations are seeded from the National Archives.
+## Verification
+
+Run `npm run check`, `npm run test:schema`, `npm run test:electoral`, `npm run test:outlook`, and `npm run build`. Python parser tests require the packages in `requirements-importers.txt`; `test:imports` additionally needs a migrated local database and separately downloaded files.
 
 ## Planning documents
 
@@ -229,8 +240,3 @@ The database starts without popular vote, candidate, or polling records. Certifi
 - [Presidential primary delegate model](docs/presidential-delegate-model.md)
 - [Presidential Electoral College results](docs/electoral-college.md)
 - [Data-source research register](docs/source-research.md)
-# Map-centered polling explorer
-
-The home page now opens the 2026 polling map. Switch between Senate, governor and House races, travel through polling dates, inspect matchups and source polls, and test chamber-control scenarios. National approval and generic-ballot polling stay in a separate national panel. Historical results and the import workflow remain available from the sidebar.
-
-See [polling outlook methodology and usage](docs/polling-outlook.md) for mapping rules, Senate baseline sources, timeline limitations, test commands and update instructions. This feature uses the existing imported data; no additional migration is required.
